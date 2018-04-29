@@ -41,8 +41,8 @@ public final class QueryUtils {
      * Query the Google Books API and return an {@link List<BookItem>} object to represent a.
      * list of earthquakes
      */
-    public static List<BookItem> fetchEarthquakes(String requestUrl) {
-        Log.i(LOG_TAG, "fetchBooks: method called");
+    public static List<BookItem> fetchBookResults(String requestUrl) {
+        Log.i(LOG_TAG, "fetchBookResults: method called");
         // Create URL object
         URL url = createUrl(requestUrl);
 
