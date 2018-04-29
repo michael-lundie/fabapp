@@ -9,15 +9,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAdapter.ViewHolder> {
 
-    private final List<BookItem> mValues;
+    public static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
 
+    private final ArrayList<BookItem> mValues;
 
-
-    public BookSearchViewAdapter(List<BookItem> items) {
+    public BookSearchViewAdapter(ArrayList<BookItem> items) {
         mValues = items;
     }
 
@@ -31,7 +32,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     @Override
     public void onBindViewHolder(final @NonNull BookSearchViewAdapter.ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-
+        Log.i(LOG_TAG, "TEST: onBindViewHolder called. Current Item: " + holder.mItem);
         holder.mTitle.setText(mValues.get(position).getTitle());
         holder.mAuthor.setText(mValues.get(position).getAuthor());
         holder.mThumbnail.setImageResource(mValues.get(position).getThumbnailResourceId());
@@ -42,7 +43,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     public int getItemCount() {
         int items = mValues.size();
         String itemsCount = Integer.toString(items);
-        Log.d("itemCount", itemsCount);
+        Log.d("TEST: itemCount", itemsCount);
         return mValues.size();
     }
 
@@ -51,7 +52,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         public final TextView mTitle;
         public final TextView mAuthor;
         public final ImageView mThumbnail;
-        private BookItem mItem;
+        public BookItem mItem;
 
 
         public ViewHolder(View view) {

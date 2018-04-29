@@ -34,7 +34,7 @@ public class SearchResultsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.book_card, container, false);
 
-        List<BookItem> bookResults = new ArrayList<>();
+        ArrayList<BookItem> bookResults = new ArrayList<>();
 
         bookResults.add(new BookItem("title", "author", R.drawable.book_thumb_dummy));
         bookResults.add(new BookItem("title", "author", R.drawable.book_thumb_dummy));

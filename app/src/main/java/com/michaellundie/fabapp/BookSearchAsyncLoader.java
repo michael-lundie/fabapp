@@ -3,16 +3,17 @@ package com.michaellundie.fabapp;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookSearchAsyncLoader extends AsyncTaskLoader<List<BookItem>> {
+public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> {
 
     private static final String LOG_TAG = MainActivity.class.getName();
 
-    private List<BookItem> bookQueryResults = null;
+    private ArrayList<BookItem> bookQueryResults = null;
     private String urlString;
 
     public BookSearchAsyncLoader(Context context, String url) {
@@ -23,17 +24,18 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<List<BookItem>> {
     @Override
     protected void onStartLoading() {
         forceLoad();
-        Log.i(LOG_TAG, "BookSearchAsyncLoader: onStartLoading executed");
+        Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: onStartLoading executed");
     }
 
     @Override
-    public List<BookItem> loadInBackground() {
-        Log.i(LOG_TAG, "BookSearchAsyncLoader: loadInBackground executed");
+    public ArrayList<BookItem> loadInBackground() {
+        Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: loadInBackground executed");
         if (urlString.length() > 0 && urlString != null) {
             try {
-                List resultItems = QueryUtils.fetchBookResults(urlString);
+                ArrayList resultItems = QueryUtils.fetchBookResults(urlString);
                 if (resultItems != null) {
-                    this.bookQueryResults = resultItems;
+                    Log.i(LOG_TAG, "TEST Result items are:" + resultItems);
+                    bookQueryResults = resultItems;
                 } else {
                     throw new IOException("No response received.");
                 }
@@ -41,7 +43,7 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<List<BookItem>> {
                 Log.e("Log error", "Problem with Request URL", e);
             }
         }
-        return this.bookQueryResults;
+        return bookQueryResults;
     }
 
 }

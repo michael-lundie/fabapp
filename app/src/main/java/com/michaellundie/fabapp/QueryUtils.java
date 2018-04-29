@@ -41,8 +41,8 @@ public final class QueryUtils {
      * Query the Google Books API and return an {@link List<BookItem>} object to represent a.
      * list of earthquakes
      */
-    public static List<BookItem> fetchBookResults(String requestUrl) {
-        Log.i(LOG_TAG, "fetchBookResults: method called");
+    public static ArrayList<BookItem> fetchBookResults(String requestUrl) {
+        Log.i(LOG_TAG, "TEST: fetchBookResults: method called");
         // Create URL object
         URL url = createUrl(requestUrl);
 
@@ -55,7 +55,7 @@ public final class QueryUtils {
         }
 
         // Extract relevant fields from the JSON response and create an {@link BookItem} object
-        List<BookItem> bookitem = extractBookResults(jsonResponse);
+        ArrayList<BookItem> bookitem = extractBookResults(jsonResponse);
 
         // Return the {@link BookItem}
         return bookitem;
@@ -148,14 +148,14 @@ public final class QueryUtils {
      * Return a list of {@link BookItem} objects that has been built up from
      * parsing a JSON response.
      */
-    public static List<BookItem> extractBookResults(String bookQueryJSON) {
+    public static ArrayList<BookItem> extractBookResults(String bookQueryJSON) {
         // If the JSON string is empty or null, then return early.
         if (TextUtils.isEmpty(bookQueryJSON)) {
             return null;
         }
 
         // Create an empty List that we can start adding earthquakes to
-        List<BookItem> bookQueryResults = new ArrayList<>();
+        ArrayList<BookItem> bookQueryResults = new ArrayList<>();
 
         //
         try {
@@ -169,7 +169,8 @@ public final class QueryUtils {
                 JSONObject currentBook = booksItemsArray.getJSONObject(bookNumber);
                 JSONObject bookInfo = currentBook.getJSONObject("volumeInfo");
 
-                String bookTitle = currentBook.getString("title");
+                String bookTitle = bookInfo.getString("title");
+                Log.i(LOG_TAG, "TEST: Book title:  " + bookTitle );
                 //JSONArray bookAuthorsArray = currentBook.getJSONArray("authors");
 
                 //for (int authors = 0; authors < booksItemsArray.length(); authors++) {
