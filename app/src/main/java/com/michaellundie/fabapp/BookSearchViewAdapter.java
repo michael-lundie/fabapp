@@ -2,6 +2,7 @@ package com.michaellundie.fabapp;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,8 @@ import java.util.List;
 public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAdapter.ViewHolder> {
 
     private final List<BookItem> mValues;
+
+
 
     public BookSearchViewAdapter(List<BookItem> items) {
         mValues = items;
@@ -26,12 +29,20 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BookSearchViewAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final @NonNull BookSearchViewAdapter.ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
+
+        holder.mTitle.setText(mValues.get(position).getTitle());
+        holder.mAuthor.setText(mValues.get(position).getAuthor());
+        holder.mThumbnail.setImageResource(mValues.get(position).getThumbnailResourceId());
+
     }
 
     @Override
     public int getItemCount() {
+        int items = mValues.size();
+        String itemsCount = Integer.toString(items);
+        Log.d("itemCount", itemsCount);
         return mValues.size();
     }
 
