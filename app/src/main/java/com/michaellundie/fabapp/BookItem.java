@@ -1,16 +1,18 @@
 package com.michaellundie.fabapp;
 
+import java.util.ArrayList;
+
 /*
   This is a custom object class for
  */
 public class BookItem {
     private String title;
-    private String author;
+    private ArrayList<String> authors;
     private int thumbnailResourceId;
 
-    public BookItem(String title, String author, int thumbnailResourceId) {
+    public BookItem(String title, ArrayList<String> author, int thumbnailResourceId) {
         this.title = title;
-        this.author = author;
+        this.authors = author;
         this.thumbnailResourceId = thumbnailResourceId;
     }
 
@@ -18,8 +20,8 @@ public class BookItem {
         return title;
     }
 
-    public String getAuthor() {
-        return author;
+    public ArrayList<String> getAuthor() {
+        return authors;
     }
 
     public int getThumbnailResourceId() {

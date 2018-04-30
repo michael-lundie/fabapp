@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final int BOOKSEARCH_LOADER_ID = 1;
     private static final String GBOOKS_REQUEST_URL =
-            "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=5";
+            "https://www.googleapis.com/books/v1/volumes?q=android&langRestrict=en&maxResults=5";
 
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;

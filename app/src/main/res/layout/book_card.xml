@@ -46,6 +46,28 @@
                 android:paddingRight="@dimen/title_padding"
                 android:textSize="@dimen/author_textSize"
                 tools:text="Darth Vader"/>
+            <TextView
+                android:id="@+id/author1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/author"
+                android:paddingBottom="@dimen/title_padding"
+                android:paddingLeft="@dimen/title_padding"
+                android:paddingRight="@dimen/title_padding"
+                android:textSize="@dimen/author_textSize"
+                android:visibility="gone"
+                tools:text="Darth Vader"/>
+            <TextView
+                android:id="@+id/author2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/author1"
+                android:paddingBottom="@dimen/title_padding"
+                android:paddingLeft="@dimen/title_padding"
+                android:paddingRight="@dimen/title_padding"
+                android:textSize="@dimen/author_textSize"
+                android:visibility="gone"
+                tools:text="Darth Vader"/>
 
         </RelativeLayout>
 

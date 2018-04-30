@@ -36,9 +36,6 @@ public class SearchResultsFragment extends Fragment {
 
         ArrayList<BookItem> bookResults = new ArrayList<>();
 
-        bookResults.add(new BookItem("title", "author", R.drawable.book_thumb_dummy));
-        bookResults.add(new BookItem("title", "author", R.drawable.book_thumb_dummy));
-        bookResults.add(new BookItem("title", "author", R.drawable.book_thumb_dummy));
 
         // Set the adapter
         if (view instanceof RecyclerView) {

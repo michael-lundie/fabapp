@@ -33,10 +33,32 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     public void onBindViewHolder(final @NonNull BookSearchViewAdapter.ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         Log.i(LOG_TAG, "TEST: onBindViewHolder called. Current Item: " + holder.mItem);
-        holder.mTitle.setText(mValues.get(position).getTitle());
-        holder.mAuthor.setText(mValues.get(position).getAuthor());
-        holder.mThumbnail.setImageResource(mValues.get(position).getThumbnailResourceId());
+        holder.mTitleView.setText(mValues.get(position).getTitle());
 
+        ArrayList<String> authorArray = mValues.get(position).getAuthor();
+        for (int authorNumber = 0; authorNumber < authorArray.size(); authorNumber++) {
+            //TODO: Handle case more than 3 authors.
+            switch (authorNumber) {
+                case 0:
+                    holder.mAuthor0View.setText(authorArray.get(authorNumber));
+                    break;
+                case 1:
+                    holder.mAuthor1View.setText(authorArray.get(authorNumber));
+                    holder.mAuthor1View.setVisibility(View.VISIBLE);
+                    break;
+                case 2:
+                    holder.mAuthor2View.setText(authorArray.get(authorNumber));
+                    holder.mAuthor2View.setVisibility(View.VISIBLE);
+                    break;
+                case 3:
+                    holder.mAuthor0View.setText(authorArray.get(authorNumber));
+                    holder.mAuthor2View.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    break;
+            }
+        }
+        holder.mThumbnailView.setImageResource(mValues.get(position).getThumbnailResourceId());
     }
 
     @Override
@@ -49,18 +71,22 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mTitle;
-        public final TextView mAuthor;
-        public final ImageView mThumbnail;
+        public final TextView mTitleView;
+        public final TextView mAuthor0View;
+        public final TextView mAuthor1View;
+        public final TextView mAuthor2View;
+        public final ImageView mThumbnailView;
         public BookItem mItem;
 
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mTitle = (TextView) view.findViewById(R.id.title);
-            mAuthor = (TextView) view.findViewById(R.id.author);
-            mThumbnail = (ImageView) view.findViewById(R.id.thumbnail);
+            mTitleView = (TextView) view.findViewById(R.id.title);
+            mAuthor0View = (TextView) view.findViewById(R.id.author);
+            mAuthor1View = (TextView) view.findViewById(R.id.author1);
+            mAuthor2View = (TextView) view.findViewById(R.id.author2);
+            mThumbnailView = (ImageView) view.findViewById(R.id.thumbnail);
         }
     }
 }

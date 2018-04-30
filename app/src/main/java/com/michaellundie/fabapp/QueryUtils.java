@@ -159,26 +159,38 @@ public final class QueryUtils {
 
         //
         try {
-
+            // Assign our returned query string to a new JSONObject
             JSONObject jsonObj = new JSONObject(bookQueryJSON);
 
-            JSONArray booksItemsArray = jsonObj.getJSONArray("items");
+            // Get JSONArray items from string
+            JSONArray booksItemsJsa = jsonObj.getJSONArray("items");
 
-            for (int bookNumber = 0; bookNumber < booksItemsArray.length(); bookNumber++) {
+            //Set up loop to parse each item in our JSONObject
+            for (int bookNumber = 0; bookNumber < booksItemsJsa.length(); bookNumber++) {
 
-                JSONObject currentBook = booksItemsArray.getJSONObject(bookNumber);
-                JSONObject bookInfo = currentBook.getJSONObject("volumeInfo");
+                JSONObject currentBookJso = booksItemsJsa.getJSONObject(bookNumber);
+                JSONObject bookInfoJso = currentBookJso.getJSONObject("volumeInfo");
 
-                String bookTitle = bookInfo.getString("title");
+                String bookTitle = bookInfoJso.getString("title");
+                //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book title:  " + bookTitle );
-                //JSONArray bookAuthorsArray = currentBook.getJSONArray("authors");
 
-                //for (int authors = 0; authors < booksItemsArray.length(); authors++) {
+                JSONArray bookAuthorsJsa = bookInfoJso.getJSONArray("authors");
+                ArrayList<String> authors = new ArrayList<>();
 
-                //}
+                if (bookAuthorsJsa != null) {
+                        for (int authorNumber = 0; authorNumber < bookAuthorsJsa.length(); authorNumber++) {
+                            //TODO: Remove Log
+                            Log.i(LOG_TAG, "TEST: Book author: retrieving index " + authorNumber );
+                            authors.add(bookAuthorsJsa.getString(authorNumber));
+                            //TODO: Remove Log
+                            Log.i(LOG_TAG, "TEST: Book author:  " + authors.get(authorNumber) );
+                        }
+                }
+                //TODO: Remove Log
+                Log.i(LOG_TAG, "TEST: Book author:  " + authors.size() + " authors retrieved." );
 
-
-                bookQueryResults.add(new BookItem(bookTitle, "author", R.drawable.book_thumb_dummy));
+                bookQueryResults.add(new BookItem(bookTitle, authors, R.drawable.book_thumb_dummy));
             }
 
         } catch (JSONException e) {
