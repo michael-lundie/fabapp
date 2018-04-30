@@ -45,5 +45,4 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> 
         }
         return bookQueryResults;
     }
-
 }

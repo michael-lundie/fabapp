@@ -15,9 +15,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<BookItem>> {
+public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = MainActivity.class.getName();
+    // Initialize loader, as opposed to implementing the LoaderManager withing MainActivity
+    // See https://stackoverflow.com/a/20839825
+    private LoaderManager.LoaderCallbacks<ArrayList<BookItem>> bookSearchLoaderCallback;
+
 
     private RecycleViewWithSetEmpty mRecyclerView;
     private RecycleViewWithSetEmpty.Adapter mAdapter;
@@ -56,41 +60,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mRecyclerView.setAdapter(mAdapter);
 
 
+        bookSearchLoaderCallback = new BookSearchCallback(this, GBOOKS_REQUEST_URL, mList, mAdapter);
+
         boolean isConnected = QueryUtils.checkNetworkAccess(this);
         if (!isConnected) {
             mProgressRing.setVisibility(View.GONE);
             mEmptyStateTextView.setText("TEST: No Internet Connection"); //TODO: Correct String Literals
         } else {
-            getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null, this);
+            getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null, bookSearchLoaderCallback);
             Log.i(LOG_TAG, "TEST: initLoader executed");
         }
-    }
-
-    //Why do we have to use ArrayList here as opposed to List?
-    //If List is an interface...we can't use it as a return type. Is there no way to work
-    // around this?
-    @Override
-    public Loader<ArrayList<BookItem>> onCreateLoader(int id, Bundle args) {
-        Log.i(LOG_TAG, "TEST: onCreateLoader called.");
-        return new BookSearchAsyncLoader(this, GBOOKS_REQUEST_URL);
-    }
-
-    @Override
-    public void onLoaderReset(Loader loader) {
-        Log.i(LOG_TAG, "TEST: onLoaderReset executed");
-        mList.clear();
-        mAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onLoadFinished(Loader<ArrayList<BookItem>> loader, ArrayList<BookItem> data) {
-        Log.i(LOG_TAG, "TEST: onLoadFinished executed");
-        Log.i(LOG_TAG, "TEST: onLoadFinished data:" + data); //NOTE: OK!
-        mList.clear();
-        mAdapter.notifyDataSetChanged();
-        mList.addAll(data);
-        mAdapter.notifyDataSetChanged();
-        mProgressRing.setVisibility(View.GONE);
-        mEmptyStateTextView.setText("No Books"); //TODO: Edit string Literal
     }
 }

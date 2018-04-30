@@ -175,10 +175,12 @@ public final class QueryUtils {
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book title:  " + bookTitle );
 
+                // Get the authors array and parse returned data.
                 JSONArray bookAuthorsJsa = bookInfoJso.getJSONArray("authors");
                 ArrayList<String> authors = new ArrayList<>();
 
                 if (bookAuthorsJsa != null) {
+                        // Add each author to a Java ArrayList object.
                         for (int authorNumber = 0; authorNumber < bookAuthorsJsa.length(); authorNumber++) {
                             //TODO: Remove Log
                             Log.i(LOG_TAG, "TEST: Book author: retrieving index " + authorNumber );
@@ -190,7 +192,15 @@ public final class QueryUtils {
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book author:  " + authors.size() + " authors retrieved." );
 
-                bookQueryResults.add(new BookItem(bookTitle, authors, R.drawable.book_thumb_dummy));
+                // Get the book image thumbnail.
+
+                JSONObject imageLinks = bookInfoJso.getJSONObject("imageLinks");
+                String thumbnailURL = imageLinks.getString("thumbnail");
+
+                //TODO: Remove Log
+                Log.i(LOG_TAG, "TEST: Book thumbnail:  " + thumbnailURL );
+
+                bookQueryResults.add(new BookItem(bookTitle, authors, thumbnailURL));
             }
 
         } catch (JSONException e) {

@@ -58,7 +58,8 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                     break;
             }
         }
-        holder.mThumbnailView.setImageResource(mValues.get(position).getThumbnailResourceId());
+        //holder.mThumbnailView.setImageResource(mValues.get(position).getThumbnailURL());
+        holder.mThumbnailView.setImageResource(R.drawable.book_thumb_dummy);
     }
 
     @Override

@@ -8,12 +8,12 @@ import java.util.ArrayList;
 public class BookItem {
     private String title;
     private ArrayList<String> authors;
-    private int thumbnailResourceId;
+    private String thumbnailURL;
 
-    public BookItem(String title, ArrayList<String> author, int thumbnailResourceId) {
+    public BookItem(String title, ArrayList<String> author, String thumbnailURL) {
         this.title = title;
         this.authors = author;
-        this.thumbnailResourceId = thumbnailResourceId;
+        this.thumbnailURL = thumbnailURL;
     }
 
     public String getTitle() {
@@ -24,7 +24,7 @@ public class BookItem {
         return authors;
     }
 
-    public int getThumbnailResourceId() {
-        return thumbnailResourceId;
+    public String getThumbnailURL() {
+        return thumbnailURL;
     }
 }
