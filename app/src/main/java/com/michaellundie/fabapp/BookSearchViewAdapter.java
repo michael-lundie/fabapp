@@ -1,13 +1,16 @@
 package com.michaellundie.fabapp;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,16 +21,22 @@ import java.util.Map;
 
 public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAdapter.ViewHolder> {
 
-    public static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
 
+    public static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
+    private Context mContext;
     private final ArrayList<BookItem> mValues;
-    public BookSearchViewAdapter(ArrayList<BookItem> items) {
+
+    public BookSearchViewAdapter(ArrayList<BookItem> items, Context context) {
         mValues = items;
+        mContext = context;
+        Log.i(LOG_TAG, "TEST: Initialising BookSearchViewAdapter");
     }
+
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.i(LOG_TAG, "TEST: OnCreateViewHolder called.");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_card, parent, false);
         return new ViewHolder(view);
     }
@@ -57,18 +66,52 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                     break;
             }
         }
-        //holder.mThumbnailView.setImageResource(mValues.get(position).getThumbnailURL());
-        //holder.mThumbnailView.setImageResource(R.drawable.book_thumb_dummy);
 
-        // Let's retrieve our thumbnail images.
+        // Let's load our thumbnail images.
 
 
-       // Bitmap thumnail =
 
-        HashMap<Integer, String> hm = new HashMap<Integer, String>();
-        hm.put(holder.mThumbnailId, holder.mItem.getThumbnailURL());
+        RecyclingImageView imageView;
 
-        loadImagesAsync(hm, holder.mView);
+        if (holder.mThumbnailView == null) { // if it's not recycled, initialize some attributes
+
+            imageView = new RecyclingImageView(mContext);
+                    imageView.setLayoutParams(new GridView.LayoutParams(
+                    GridView.LayoutParams.WRAP_CONTENT,
+                    GridView.LayoutParams.WRAP_CONTENT));
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            imageView.setPadding(5, 5, 5, 5);
+
+        } else {
+            imageView = (RecyclingImageView) holder.mThumbnailView;
+        }
+
+        // Fetch the URL we will use for downloading our image
+        String dataItem = mValues.get(position).getThumbnailURL();
+
+        Log.i(LOG_TAG, "TEST: Data item is: " + dataItem);
+
+        RecyclingBitmapDrawable image;
+        Log.i(LOG_TAG, "TEST: Attempting to get bitmap from cache for position " + position);
+            image = CacheManager.getInstance().getBitmapFromMemCache(dataItem);
+
+        if(image != null) {
+            Log.i(LOG_TAG, "TEST: Looks like image is in cache - return it.");
+            // This internally is checking reference count on previous bitmap it used.
+            imageView.setImageDrawable(image);
+        } else {
+            Log.i(LOG_TAG, "TEST: Nothing in cache, download and put it in cache");
+            // You have to implement this method as per your code structure.
+            // But it basically doing is preparing bitmap in the background
+            // and adding that to LruCache.
+            // Also it is setting the empty view till bitmap gets loaded.
+            // once loaded it just need to call notifyDataSetChanged of adapter.
+            HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
+            imageAndViewPair.put(holder.mThumbnailId, holder.mItem.getThumbnailURL());
+
+            loadImagesAsync(imageAndViewPair, holder.mView);
+        }
+
     }
 
     @Override
@@ -86,6 +129,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         public final TextView mAuthor1View;
         public final TextView mAuthor2View;
         public final Integer mThumbnailId;
+        public final ImageView mThumbnailView;
         public BookItem mItem;
 
 
@@ -96,6 +140,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             mAuthor0View = (TextView) view.findViewById(R.id.author);
             mAuthor1View = (TextView) view.findViewById(R.id.author1);
             mAuthor2View = (TextView) view.findViewById(R.id.author2);
+            mThumbnailView = (ImageView) view.findViewById(R.id.thumbnail);
             mThumbnailId = R.id.thumbnail;
         }
     }
@@ -108,6 +153,8 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                 public void onImageDownloaded(final Bitmap bitmap) {
                     ((ImageView) view.findViewById(binding.getKey()))
                             .setImageBitmap(bitmap);
+                    RecyclingBitmapDrawable bitmapDrawable = new RecyclingBitmapDrawable(mContext.getResources(), bitmap);
+                    CacheManager.getInstance().addBitmapToMemoryCache(binding.getValue(), bitmapDrawable);
                 }
                 @Override
                 public void onImageDownloadError() {

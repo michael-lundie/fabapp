@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 // Image Async Downloader code primarily from:
 // https://android.jlelse.eu/async-loading-images-on-android-like-a-big-baws-fd97d1a91374

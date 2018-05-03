@@ -5,6 +5,7 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int BOOKSEARCH_LOADER_ID = 1;
     private static final String GBOOKS_REQUEST_URL =
-            "https://www.googleapis.com/books/v1/volumes?q=android&langRestrict=en&maxResults=5";
+            "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=18";
 
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
@@ -52,10 +53,13 @@ public class MainActivity extends AppCompatActivity {
         mProgressRing = findViewById(R.id.progressRing);
 
         // Let's use a linear layout manager
-        mAdapter = new BookSearchViewAdapter(mList);
+        mAdapter = new BookSearchViewAdapter(mList, this);
 
         // Let's specify an adapter.
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        //mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        //mRecyclerView.setAdapter(mAdapter);
+
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         mRecyclerView.setAdapter(mAdapter);
 
         // Create loader from class, as opposed to implementing the LoaderManager withing MainActivity
