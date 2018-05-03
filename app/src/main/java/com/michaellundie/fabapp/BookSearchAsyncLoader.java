@@ -30,7 +30,7 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> 
     @Override
     public ArrayList<BookItem> loadInBackground() {
         Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: loadInBackground executed");
-        if (urlString.length() > 0 && urlString != null) {
+        if (urlString.length() > 0) {
             try {
                 ArrayList resultItems = QueryUtils.fetchBookResults(urlString);
                 if (resultItems != null) {

@@ -55,6 +55,8 @@ public final class QueryUtils {
         }
 
         // Extract relevant fields from the JSON response and create an {@link BookItem} object
+        String jsonSize = new Integer(jsonResponse.length()).toString();
+        Log.i(LOG_TAG, "TEST: Length of jsonResponse is" + jsonSize);
         ArrayList<BookItem> bookitem = extractBookResults(jsonResponse);
 
         // Return the {@link BookItem}
@@ -171,12 +173,14 @@ public final class QueryUtils {
                 JSONObject currentBookJso = booksItemsJsa.getJSONObject(bookNumber);
                 JSONObject bookInfoJso = currentBookJso.getJSONObject("volumeInfo");
 
-                String bookTitle = bookInfoJso.getString("title");
+                String bookTitle = bookInfoJso.optString("title");
+
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book title:  " + bookTitle );
 
                 // Get the authors array and parse returned data.
-                JSONArray bookAuthorsJsa = bookInfoJso.getJSONArray("authors");
+
+                JSONArray bookAuthorsJsa = bookInfoJso.optJSONArray("authors");
                 ArrayList<String> authors = new ArrayList<>();
 
                 if (bookAuthorsJsa != null) {
@@ -189,13 +193,14 @@ public final class QueryUtils {
                             Log.i(LOG_TAG, "TEST: Book author:  " + authors.get(authorNumber) );
                         }
                 }
+
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book author:  " + authors.size() + " authors retrieved." );
 
                 // Get the book image thumbnail.
 
-                JSONObject imageLinks = bookInfoJso.getJSONObject("imageLinks");
-                String thumbnailURL = imageLinks.getString("thumbnail");
+                JSONObject imageLinks = bookInfoJso.optJSONObject("imageLinks");
+                String thumbnailURL = imageLinks.optString("thumbnail");
 
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book thumbnail:  " + thumbnailURL );

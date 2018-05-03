@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int BOOKSEARCH_LOADER_ID = 1;
     private static final String GBOOKS_REQUEST_URL =
-            "https://www.googleapis.com/books/v1/volumes?q=android&langRestrict=en&maxResults=5";
+            "https://www.googleapis.com/books/v1/volumes?q=birds&langRestrict=en&maxResults=18";
 
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
