@@ -18,8 +18,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = MainActivity.class.getName();
-    // Initialize loader, as opposed to implementing the LoaderManager withing MainActivity
-    // See https://stackoverflow.com/a/20839825
+
     private LoaderManager.LoaderCallbacks<ArrayList<BookItem>> bookSearchLoaderCallback;
 
 
@@ -59,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
 
-
-        bookSearchLoaderCallback = new BookSearchCallback(this, GBOOKS_REQUEST_URL, mList, mAdapter);
+        // Create loader from class, as opposed to implementing the LoaderManager withing MainActivity
+        // Initial idea found here: See https://stackoverflow.com/a/20839825
+        bookSearchLoaderCallback = new BookSearchCallback(this, GBOOKS_REQUEST_URL, mList, mAdapter,
+                mProgressRing, mEmptyStateTextView);
 
         boolean isConnected = QueryUtils.checkNetworkAccess(this);
         if (!isConnected) {

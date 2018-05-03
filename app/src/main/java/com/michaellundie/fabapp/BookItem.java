@@ -9,22 +9,26 @@ public class BookItem {
     private String title;
     private ArrayList<String> authors;
     private String thumbnailURL;
+    private int itemID;
 
-    public BookItem(String title, ArrayList<String> author, String thumbnailURL) {
+    public BookItem(String title, ArrayList<String> author, String thumbnailURL, int itemID) {
         this.title = title;
         this.authors = author;
         this.thumbnailURL = thumbnailURL;
+        this.itemID = itemID;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public ArrayList<String> getAuthor() {
+    public ArrayList<String> getAuthors() {
         return authors;
     }
 
     public String getThumbnailURL() {
         return thumbnailURL;
     }
+
+    public int getItemID() { return itemID; }
 }

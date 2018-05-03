@@ -11,7 +11,7 @@ import java.util.List;
 
 public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> {
 
-    private static final String LOG_TAG = MainActivity.class.getName();
+    private static final String LOG_TAG = BookSearchAsyncLoader.class.getSimpleName();
 
     private ArrayList<BookItem> bookQueryResults = null;
     private String urlString;
@@ -23,8 +23,17 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> 
 
     @Override
     protected void onStartLoading() {
-        forceLoad();
-        Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: onStartLoading executed");
+        // Let's check for cached data
+        if (bookQueryResults !=null) {
+            //Use cached data
+            deliverResult(bookQueryResults);
+            Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: Delivering some cached data.");
+        } else {
+            //There is no data so let's get the party started!
+            forceLoad();
+            Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: onStartLoading executed");
+        }
+
     }
 
     @Override

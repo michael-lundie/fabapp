@@ -6,6 +6,8 @@ import android.content.Loader;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -15,16 +17,19 @@ public class BookSearchCallback implements LoaderManager.LoaderCallbacks<ArrayLi
     private Context context;
     private ArrayList<BookItem> list;
     private String connectURL;
+    private ProgressBar progressRing;
+    private TextView emptyStateTextView;
     private RecycleViewWithSetEmpty.Adapter adapter;
 
     BookSearchCallback(Context context, String connectURL, ArrayList<BookItem> list,
-                       RecycleViewWithSetEmpty.Adapter adapter) {
+                       RecycleViewWithSetEmpty.Adapter adapter, ProgressBar bar,
+                       TextView emptyStateView) {
         this.context = context;
         this.connectURL = connectURL;
         this.list = list;
         this.adapter = adapter;
-
-        //loaderManager.initLoader(0, null, this);
+        this.progressRing = bar;
+        this.emptyStateTextView = emptyStateView;
     }
 
     @Override
@@ -48,7 +53,7 @@ public class BookSearchCallback implements LoaderManager.LoaderCallbacks<ArrayLi
         adapter.notifyDataSetChanged();
         list.addAll(data);
         adapter.notifyDataSetChanged();
-        //mProgressRing.setVisibility(View.GONE);
-        //mEmptyStateTextView.setText("No Books"); //TODO: Edit string Literal
+        progressRing.setVisibility(View.GONE);
+        emptyStateTextView.setText("No Books"); //TODO: Edit string Literal
     }
 }
