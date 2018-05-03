@@ -9,7 +9,7 @@ public class CacheManager {
 
     public static final String LOG_TAG = CacheManager.class.getSimpleName();
 
-    private LruCache<String, RecyclingBitmapDrawable> mMemoryCache;
+    private LruCache<Integer, RecyclingBitmapDrawable> mMemoryCache;
 
     private static CacheManager instance;
 
@@ -26,9 +26,9 @@ public class CacheManager {
 
         // We are declaring a cache of 6Mb for our use.
         // You need to calculate this on the basis of your need
-        mMemoryCache = new LruCache<String, RecyclingBitmapDrawable>(6 * 1024 * 1024) {
+        mMemoryCache = new LruCache<Integer, RecyclingBitmapDrawable>(6 * 1024 * 1024) {
             @Override
-            protected int sizeOf(String key, RecyclingBitmapDrawable bitmapDrawable) {
+            protected int sizeOf(Integer key, RecyclingBitmapDrawable bitmapDrawable) {
                 // The cache size will be measured in kilobytes rather than
                 // number of items.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
@@ -39,7 +39,7 @@ public class CacheManager {
             }
 
             @Override
-            protected void entryRemoved(boolean evicted, String key, RecyclingBitmapDrawable oldValue, RecyclingBitmapDrawable newValue) {
+            protected void entryRemoved(boolean evicted, Integer key, RecyclingBitmapDrawable oldValue, RecyclingBitmapDrawable newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);
                 oldValue.setIsCached(false);
             }
@@ -47,7 +47,7 @@ public class CacheManager {
 
     }
 
-    public void addBitmapToMemoryCache(String key, RecyclingBitmapDrawable bitmapDrawable) {
+    public void addBitmapToMemoryCache(Integer key, RecyclingBitmapDrawable bitmapDrawable) {
         if (getBitmapFromMemCache(key) == null) {
             // The removed entry is a recycling drawable, so notify it
             // that it has been added into the memory cache
@@ -56,7 +56,7 @@ public class CacheManager {
         }
     }
 
-    public RecyclingBitmapDrawable getBitmapFromMemCache(String key) {
+    public RecyclingBitmapDrawable getBitmapFromMemCache(Integer key) {
                 if(key ==null) {
                     Log.i(LOG_TAG, "TEST: Key is null, null will be returned.");
                 }

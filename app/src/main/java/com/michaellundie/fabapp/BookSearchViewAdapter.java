@@ -47,7 +47,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         Log.i(LOG_TAG, "TEST: onBindViewHolder called. Current Item: " + holder.mItem);
         holder.mTitleView.setText(mValues.get(position).getTitle());
 
-        ArrayList<String> authorArray = mValues.get(position).getAuthors();
+        ArrayList<String> authorArray = holder.mItem.getAuthors();
         for (int authorNumber = 0; authorNumber < authorArray.size(); authorNumber++) {
             //TODO: Handle case more than 3 authors.
             switch (authorNumber) {
@@ -93,7 +93,8 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
 
         RecyclingBitmapDrawable image;
         Log.i(LOG_TAG, "TEST: Attempting to get bitmap from cache for position " + position);
-            image = CacheManager.getInstance().getBitmapFromMemCache(dataItem);
+
+        image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
 
         if(image != null) {
             Log.i(LOG_TAG, "TEST: Looks like image is in cache - return it.");
@@ -109,7 +110,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
             imageAndViewPair.put(holder.mThumbnailId, holder.mItem.getThumbnailURL());
 
-            loadImagesAsync(imageAndViewPair, holder.mView);
+            loadImagesAsync(imageAndViewPair, holder.mView, holder.mItem.getItemID());
         }
 
     }
@@ -145,7 +146,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         }
     }
 
-    private void loadImagesAsync(final Map<Integer, String> bindings, final View view) {
+    private void loadImagesAsync(final Map<Integer, String> bindings, final View view, final int id) {
         for (final Map.Entry<Integer, String> binding :
                 bindings.entrySet()) {
             new DownloadImageAsync(new DownloadImageAsync.Listener() {
@@ -154,7 +155,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                     ((ImageView) view.findViewById(binding.getKey()))
                             .setImageBitmap(bitmap);
                     RecyclingBitmapDrawable bitmapDrawable = new RecyclingBitmapDrawable(mContext.getResources(), bitmap);
-                    CacheManager.getInstance().addBitmapToMemoryCache(binding.getValue(), bitmapDrawable);
+                    CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
                 }
                 @Override
                 public void onImageDownloadError() {

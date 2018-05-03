@@ -114,7 +114,7 @@ public final class QueryUtils {
                 Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Problem retrieving the earthquake JSON results.", e);
+            Log.e(LOG_TAG, "Problem retrieving the Google Books JSON results.", e);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -171,12 +171,12 @@ public final class QueryUtils {
                 JSONObject currentBookJso = booksItemsJsa.getJSONObject(bookNumber);
                 JSONObject bookInfoJso = currentBookJso.getJSONObject("volumeInfo");
 
-                String bookTitle = bookInfoJso.getString("title");
+                String bookTitle = bookInfoJso.optString("title");
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book title:  " + bookTitle );
 
                 // Get the authors array and parse returned data.
-                JSONArray bookAuthorsJsa = bookInfoJso.getJSONArray("authors");
+                JSONArray bookAuthorsJsa = bookInfoJso.optJSONArray("authors");
                 ArrayList<String> authors = new ArrayList<>();
 
                 if (bookAuthorsJsa != null) {
@@ -194,9 +194,13 @@ public final class QueryUtils {
 
                 // Get the book image thumbnail.
 
-                JSONObject imageLinks = bookInfoJso.getJSONObject("imageLinks");
-                String thumbnailURL = imageLinks.getString("thumbnail");
-
+                JSONObject imageLinks = bookInfoJso.optJSONObject("imageLinks");
+                String thumbnailURL;
+                if(imageLinks != null) {
+                    thumbnailURL = imageLinks.optString("thumbnail");
+                } else {
+                    thumbnailURL = null;
+                }
                 //TODO: Remove Log
                 Log.i(LOG_TAG, "TEST: Book thumbnail:  " + thumbnailURL );
 
@@ -208,7 +212,7 @@ public final class QueryUtils {
             // catch the exception here, so the app doesn't crash. Print a log message
             // with the message from the exception.
             Log.e("QueryUtils", "Problem parsing the JSON results", e);
-        }
+    }
 
         // Return the list of earthquakes
         return bookQueryResults;
