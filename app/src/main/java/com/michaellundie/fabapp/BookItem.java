@@ -3,7 +3,7 @@ package com.michaellundie.fabapp;
 import java.util.ArrayList;
 
 /*
-  This is a custom object class for
+ * A simple class to store and handle BookItem data.
  */
 public class BookItem {
     private String title;

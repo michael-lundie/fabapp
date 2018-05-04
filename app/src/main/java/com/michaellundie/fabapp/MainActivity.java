@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         // Create loader from class, as opposed to implementing the LoaderManager withing MainActivity
-        // Initial idea found here: See https://stackoverflow.com/a/20839825
+        // Used assistance and code from: https://stackoverflow.com/a/20839825
         bookSearchLoaderCallback = new BookSearchCallback(this, GBOOKS_REQUEST_URL, mList, mAdapter,
                 mProgressRing, mEmptyStateTextView);
 

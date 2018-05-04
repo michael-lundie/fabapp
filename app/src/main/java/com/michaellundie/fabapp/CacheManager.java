@@ -5,6 +5,8 @@ import android.os.Build;
 import android.util.Log;
 import android.util.LruCache;
 
+// Cache Manager code from https://stackoverflow.com/a/22855962
+
 public class CacheManager {
 
     public static final String LOG_TAG = CacheManager.class.getSimpleName();

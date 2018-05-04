@@ -69,12 +69,10 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
 
         // Let's load our thumbnail images.
 
-
-
         RecyclingImageView imageView;
 
         if (holder.mThumbnailView == null) { // if it's not recycled, initialize some attributes
-
+            Log.i(LOG_TAG, "TEST: Thumbnail is null. Initialising for ." + holder.mItem.getItemID());
             imageView = new RecyclingImageView(mContext);
                     imageView.setLayoutParams(new GridView.LayoutParams(
                     GridView.LayoutParams.WRAP_CONTENT,
@@ -89,12 +87,10 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         // Fetch the URL we will use for downloading our image
         String dataItem = mValues.get(position).getThumbnailURL();
 
-        Log.i(LOG_TAG, "TEST: Data item is: " + dataItem);
-
-        RecyclingBitmapDrawable image;
+        // -Begin code from https://stackoverflow.com/a/22855962/9738433-
         Log.i(LOG_TAG, "TEST: Attempting to get bitmap from cache for position " + position);
 
-        image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
+        RecyclingBitmapDrawable image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
 
         if(image != null) {
             Log.i(LOG_TAG, "TEST: Looks like image is in cache - return it.");
@@ -102,16 +98,12 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             imageView.setImageDrawable(image);
         } else {
             Log.i(LOG_TAG, "TEST: Nothing in cache, download and put it in cache");
-            // You have to implement this method as per your code structure.
-            // But it basically doing is preparing bitmap in the background
-            // and adding that to LruCache.
-            // Also it is setting the empty view till bitmap gets loaded.
-            // once loaded it just need to call notifyDataSetChanged of adapter.
             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
             imageAndViewPair.put(holder.mThumbnailId, holder.mItem.getThumbnailURL());
 
             loadImagesAsync(imageAndViewPair, holder.mView, holder.mItem.getItemID());
         }
+        // -End code from https://stackoverflow.com/a/22855962/9738433-
 
     }
 
@@ -146,20 +138,22 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         }
     }
 
+    // Image Async Downloader code from:
+    // https://android.jlelse.eu/async-loading-images-on-android-like-a-big-baws-fd97d1a91374
     private void loadImagesAsync(final Map<Integer, String> bindings, final View view, final int id) {
         for (final Map.Entry<Integer, String> binding :
                 bindings.entrySet()) {
             new DownloadImageAsync(new DownloadImageAsync.Listener() {
                 @Override
                 public void onImageDownloaded(final Bitmap bitmap) {
-                    ((ImageView) view.findViewById(binding.getKey()))
-                            .setImageBitmap(bitmap);
                     RecyclingBitmapDrawable bitmapDrawable = new RecyclingBitmapDrawable(mContext.getResources(), bitmap);
                     CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
+                    ((ImageView) view.findViewById(binding.getKey()))
+                            .setImageDrawable(bitmapDrawable);
                 }
                 @Override
                 public void onImageDownloadError() {
-                    Log.e(LOG_TAG, "Failed to download image from "
+                    Log.e(LOG_TAG, "Failed to download image for "
                             + binding.getKey());
                 }
             }).execute(binding.getValue());

@@ -33,7 +33,6 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> 
             forceLoad();
             Log.i(LOG_TAG, "TEST: BookSearchAsyncLoader: onStartLoading executed");
         }
-
     }
 
     @Override
