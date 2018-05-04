@@ -41,9 +41,11 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView = (RecycleViewWithSetEmpty) findViewById(R.id.list);
 
+
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecycleViewWithSetEmpty
-        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setHasFixedSize(false);
+        mRecyclerView.setItemViewCacheSize(5);
 
         //Set the empty state for our custom RecycleViewer
         mEmptyStateTextView = (TextView) findViewById(R.id.list_empty);

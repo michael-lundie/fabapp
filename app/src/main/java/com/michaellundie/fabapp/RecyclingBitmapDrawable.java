@@ -22,12 +22,16 @@ import android.graphics.drawable.BitmapDrawable;
 
 import android.util.Log;
 
+import static com.michaellundie.fabapp.BookSearchViewAdapter.getViewPosition;
+import static com.michaellundie.fabapp.BookSearchViewAdapter.getViewKey;
 /**
  * A BitmapDrawable that keeps track of whether it is being displayed or cached.
  * When the drawable is no longer being displayed or cached,
  * {@link android.graphics.Bitmap#recycle() recycle()} will be called on this drawable's bitmap.
  */
 public class RecyclingBitmapDrawable extends BitmapDrawable {
+
+    static final String LOG_TAG = RecyclingBitmapDrawable.class.getSimpleName();
 
     static final String TAG = "CountingBitmapDrawable";
 
@@ -48,13 +52,17 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
      * @param isDisplayed - Whether the drawable is being displayed or not
      */
     public void setIsDisplayed(boolean isDisplayed) {
+        //TODO: Log tool
+        Log.i(LOG_TAG, "TEST: setIsDisplayed called for position" + getViewPosition() + ". Key is " + getViewKey());
         //BEGIN_INCLUDE(set_is_displayed)
         synchronized (this) {
             if (isDisplayed) {
                 mDisplayRefCount++;
                 mHasBeenDisplayed = true;
+                Log.i(LOG_TAG, "TEST: Display TRUE. Count is " + mDisplayRefCount + "(Has been displayed: " + mHasBeenDisplayed + " )");
             } else {
                 mDisplayRefCount--;
+                Log.i(LOG_TAG, "TEST: Display FALSE. Count is " + mDisplayRefCount + "(Has been displayed: " + mHasBeenDisplayed + " )");
             }
         }
 
@@ -70,6 +78,8 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
      * @param isCached - Whether the drawable is being cached or not
      */
     public void setIsCached(boolean isCached) {
+        //TODO: Log tool
+        Log.i(LOG_TAG, "TEST: setIsCached called for position" + getViewPosition() + ". Key is " + getViewKey());
         //BEGIN_INCLUDE(set_is_cached)
         synchronized (this) {
             if (isCached) {
@@ -91,9 +101,7 @@ public class RecyclingBitmapDrawable extends BitmapDrawable {
         if (mCacheRefCount <= 0 && mDisplayRefCount <= 0 && mHasBeenDisplayed
                 && hasValidBitmap()) {
 
-            Log.d(TAG, "No longer being used or cached so recycling. "
-                    + toString());
-
+            Log.i(LOG_TAG, "TEST: recycle was called for " + getViewPosition() + ". Key is " + getViewKey());
             getBitmap().recycle();
         }
         //END_INCLUDE(check_state)

@@ -26,6 +26,10 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     private Context mContext;
     private final ArrayList<BookItem> mValues;
 
+    //TODO: Log tool
+    private static int viewPositionVariable;
+    private static int viewPositionKey;
+
     public BookSearchViewAdapter(ArrayList<BookItem> items, Context context) {
         mValues = items;
         mContext = context;
@@ -68,21 +72,13 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         }
 
         // Let's load our thumbnail images.
+        //TODO: Log tool
+        viewPositionVariable = position;
+        viewPositionKey = holder.mItem.getItemID();
 
         RecyclingImageView imageView;
 
-        if (holder.mThumbnailView == null) { // if it's not recycled, initialize some attributes
-            Log.i(LOG_TAG, "TEST: Thumbnail is null. Initialising for ." + holder.mItem.getItemID());
-            imageView = new RecyclingImageView(mContext);
-                    imageView.setLayoutParams(new GridView.LayoutParams(
-                    GridView.LayoutParams.WRAP_CONTENT,
-                    GridView.LayoutParams.WRAP_CONTENT));
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            imageView.setPadding(5, 5, 5, 5);
-
-        } else {
-            imageView = (RecyclingImageView) holder.mThumbnailView;
-        }
+        imageView = (RecyclingImageView) holder.mThumbnailView;
 
         // Fetch the URL we will use for downloading our image
         String dataItem = mValues.get(position).getThumbnailURL();
@@ -110,9 +106,22 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     @Override
     public int getItemCount() {
         int items = mValues.size();
-        String itemsCount = Integer.toString(items);
-        Log.d("TEST: itemCount", itemsCount);
+        //TODO: Remove log
+        //String itemsCount = Integer.toString(items);
+        //Log.d("TEST: itemCount", itemsCount);
         return mValues.size();
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        Log.i(LOG_TAG, "TEST: onViewRecycled ITEM ID:");
+        super.onViewRecycled(holder);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        Log.i(LOG_TAG, "TEST: Current ITEM ID:" + getItemId(position));
+        return super.getItemId(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -147,7 +156,9 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                 @Override
                 public void onImageDownloaded(final Bitmap bitmap) {
                     RecyclingBitmapDrawable bitmapDrawable = new RecyclingBitmapDrawable(mContext.getResources(), bitmap);
+
                     CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
+
                     ((ImageView) view.findViewById(binding.getKey()))
                             .setImageDrawable(bitmapDrawable);
                 }
@@ -158,5 +169,16 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                 }
             }).execute(binding.getValue());
         }
+    }
+
+    /*
+    BEGIN LOG TOOLS
+     */
+
+    public static int getViewPosition() {
+        return viewPositionVariable;
+    }
+    public static int getViewKey() {
+        return viewPositionKey;
     }
 }

@@ -21,9 +21,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.support.v7.widget.AppCompatImageView;
+import android.util.Log;
 import android.widget.ImageView;
 
-
+import static com.michaellundie.fabapp.BookSearchViewAdapter.getViewPosition;
+import static com.michaellundie.fabapp.BookSearchViewAdapter.getViewKey;
 /**
  * Sub-class of ImageView which automatically notifies the drawable when it is
  * being displayed.
@@ -45,10 +47,21 @@ public class RecyclingImageView extends AppCompatImageView {
      */
     @Override
     protected void onDetachedFromWindow() {
+        Log.i(LOG_TAG, "TEST: On detach call for position " + getViewPosition() + ". Key is: " + getViewKey());
         // This has been detached from Window, so clear the drawable
         setImageDrawable(null);
 
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        Log.i(LOG_TAG, "TEST: On ATTACHED called for position " + getViewPosition() + ". Key is: " + getViewKey());
+        RecyclingBitmapDrawable bitmap = CacheManager.getInstance().getBitmapFromMemCache(getViewKey());
+        if(bitmap != null) {
+            setImageDrawable(bitmap);
+        }
+        super.onAttachedToWindow();
     }
 
     /**
