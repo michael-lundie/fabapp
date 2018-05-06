@@ -18,12 +18,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.michaellundie.fabapp.RecyclingImageView
+            <ImageView
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
                 android:scaleType="centerCrop"
                 tools:src="@drawable/book_thumb_dummy"
                 />

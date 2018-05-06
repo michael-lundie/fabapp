@@ -46,9 +46,9 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> 
                     bookQueryResults = resultItems;
                 } else {
                     throw new IOException("No response received.");
-                }
-            } catch(Exception e) {
-                Log.e("Log error", "Problem with Request URL", e);
+            }
+        } catch(Exception e) {
+            Log.e("Log error", "Problem with Request URL", e);
             }
         }
         return bookQueryResults;

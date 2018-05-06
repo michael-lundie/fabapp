@@ -76,9 +76,9 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         viewPositionVariable = position;
         viewPositionKey = holder.mItem.getItemID();
 
-        RecyclingImageView imageView;
+        ImageView imageView;
 
-        imageView = (RecyclingImageView) holder.mThumbnailView;
+        imageView = (ImageView) holder.mThumbnailView;
 
         // Fetch the URL we will use for downloading our image
         String dataItem = mValues.get(position).getThumbnailURL();
@@ -86,7 +86,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         // -Begin code from https://stackoverflow.com/a/22855962/9738433-
         Log.i(LOG_TAG, "TEST: Attempting to get bitmap from cache for position " + position);
 
-        RecyclingBitmapDrawable image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
+        BitmapDrawable image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
 
         if(image != null) {
             Log.i(LOG_TAG, "TEST: Looks like image is in cache - return it.");
@@ -155,7 +155,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             new DownloadImageAsync(new DownloadImageAsync.Listener() {
                 @Override
                 public void onImageDownloaded(final Bitmap bitmap) {
-                    RecyclingBitmapDrawable bitmapDrawable = new RecyclingBitmapDrawable(mContext.getResources(), bitmap);
+                    BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
 
                     CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
 

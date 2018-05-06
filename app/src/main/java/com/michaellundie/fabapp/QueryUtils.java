@@ -3,6 +3,7 @@ package com.michaellundie.fabapp;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -38,8 +39,60 @@ public final class QueryUtils {
     }
 
     /**
+     * Method for building our query URL
+     * @param context The current activity context.
+     * @param searchInput The search input from the user.
+     * @param language The search language the user has chosen.
+     * @return
+     */
+    public static String queryRequestBuilder (Context context, String searchInput, String language){
+
+        //Set up our variables ready for our string builder
+        //NOTE: Is it better to initialise these outside of this method? Are they recreated and
+        // destroyed every time the method is called?
+        final String API_AUTHORITY = context.getResources().getString(R.string.api_authority);
+        final String API_BOOKS_PATH = "books";
+        final String API_VERSION = context.getResources().getString(R.string.api_version);
+        final String API_VOLUMES_PATH = "volumes";
+        final String API_QUERY_PARAM = "q";
+        final String API_RESULTS_PARAM = "maxResults";
+        final String API_LANG_PARAM = "langRestrict";
+        final String API_RETURN_VALUE = context.getResources().getString(R.string.api_return_value);
+
+        //Use URL builder to construct our URL
+        Uri.Builder query = new Uri.Builder();
+        query.scheme("https")
+                .authority(API_AUTHORITY)
+                .appendPath(API_BOOKS_PATH)
+                .appendPath(API_VERSION)
+                .appendPath(API_VOLUMES_PATH)
+                .appendQueryParameter(API_QUERY_PARAM, searchInput)
+                .appendQueryParameter(API_LANG_PARAM, language)
+                .appendQueryParameter(API_RESULTS_PARAM, API_RETURN_VALUE)
+                .build();
+        URL returnUrl = null;
+
+        //Attempt to return our URL, check for exception, then convert to String on return.
+        try {
+            returnUrl = new URL(query.toString());
+        } catch (MalformedURLException e) {
+            //We'll do further checking in AsyncLoader, but perhaps it's nice to check for
+            //any initial errors.
+            Log.e(LOG_TAG, "There is a problem with URL construction.", e);
+        }
+
+        //Handle any null pointer exception that may be thrown by .toString() method;
+        if (returnUrl == null) {
+            Log.i(LOG_TAG, "URL returned null.");
+            return null;
+        } return returnUrl.toString();
+    }
+
+    /**
      * Query the Google Books API and return an {@link List<BookItem>} object to represent a.
      * list of earthquakes
+     * @param requestUrl
+     * @return
      */
     public static ArrayList<BookItem> fetchBookResults(String requestUrl) {
         Log.i(LOG_TAG, "TEST: fetchBookResults: method called");
@@ -61,7 +114,13 @@ public final class QueryUtils {
         return bookitem;
     }
 
+
     //TODO: Handle Null Pointer Exception
+    /**
+     * TODO: docs
+     * @param context
+     * @return
+     */
     public static boolean checkNetworkAccess(Context context) {
         ConnectivityManager cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
