@@ -31,6 +31,8 @@ public class RecycleViewWithSetEmpty extends RecyclerView {
         }
     };
 
+
+
     public RecycleViewWithSetEmpty(Context context) {
         super(context);
     }

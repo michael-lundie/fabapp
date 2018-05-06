@@ -81,6 +81,7 @@ public final class QueryUtils {
             Log.e(LOG_TAG, "There is a problem with URL construction.", e);
         }
 
+        Log.i(LOG_TAG,"TEST" + returnUrl.toString());
         //Handle any null pointer exception that may be thrown by .toString() method;
         if (returnUrl == null) {
             Log.i(LOG_TAG, "URL returned null.");

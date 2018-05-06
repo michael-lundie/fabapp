@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">fabapp</string>
-
+    <string name="app_name">FABapp</string>
+    <!-- UI strings -->
+    <string name="search_text">Find a book...</string>
+    <string name="search_button_text">Search</string>
     <!-- API Strings -->
     <string name="api_authority">www.googleapis.com</string>
     <string name="api_version">v1</string>

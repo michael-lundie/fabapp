@@ -2,19 +2,16 @@ package com.michaellundie.fabapp;
 
 import android.content.Context;
 import android.app.LoaderManager;
-import android.content.Loader;
-import android.content.res.Configuration;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -28,22 +25,26 @@ public class MainActivity extends AppCompatActivity  {
     public static final String LOG_TAG = MainActivity.class.getName();
 
     private LoaderManager.LoaderCallbacks<ArrayList<BookItem>> bookSearchLoaderCallback;
-
-
     private RecycleViewWithSetEmpty mRecyclerView;
     private RecycleViewWithSetEmpty.Adapter mAdapter;
     private ArrayList<BookItem> mList = new ArrayList<>();
 
     private static final int BOOKSEARCH_LOADER_ID = 1;
-    private static final String GBOOKS_REQUEST_URL =
-            "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=30";
+    private static String GBOOKS_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes/?q=test&langRestrict=en&maxResults=20";
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
+
+    private final String KEY_RECYCLER_STATE = "recycler_state";
+    private Bundle mBundleRecyclerViewState;
+
+    private Button searchButton;
+    private EditText searchEditText;
     static int mLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         SpinnerInteractionListener mSpinnerListener = new SpinnerInteractionListener();
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity  {
         mSpinner.setOnItemSelectedListener(mSpinnerListener);
 
         mRecyclerView = (RecycleViewWithSetEmpty) findViewById(R.id.list);
+
 
 
         // use this setting to improve performance if you know that changes
@@ -67,6 +69,8 @@ public class MainActivity extends AppCompatActivity  {
         //Set up the progress ring view
         mProgressRing = findViewById(R.id.progressRing);
 
+        searchButton = findViewById(R.id.searchButton);
+        searchEditText = findViewById(R.id.searchEditText);
         // Let's use a linear layout manager
         mAdapter = new BookSearchViewAdapter(mList, this);
 
@@ -76,6 +80,29 @@ public class MainActivity extends AppCompatActivity  {
 
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+
+
+    public void onSearchClicked(View searchButton) {
+        // upon a new search initiation, destroy previous loader.
+        getLoaderManager().destroyLoader(BOOKSEARCH_LOADER_ID);
+        //clear the array list
+        mList.clear();
+        //clear our cache
+        CacheManager.getInstance().clear();
+        //notify the adapter
+        mAdapter.notifyDataSetChanged();
+
+        String userQuery = searchEditText.getText().toString();
+        Context context = getApplicationContext();
+
+        //TODO: Hook up language selection
+        GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,userQuery,"en");
+        executeSearch();
+    }
+
+    public void executeSearch() {
 
         // Create loader from class, as opposed to implementing the LoaderManager withing MainActivity
         // Used assistance and code from: https://stackoverflow.com/a/20839825
@@ -85,8 +112,10 @@ public class MainActivity extends AppCompatActivity  {
         boolean isConnected = QueryUtils.checkNetworkAccess(this);
         if (!isConnected) {
             mProgressRing.setVisibility(View.GONE);
+            mEmptyStateTextView.setVisibility(View.VISIBLE);
             mEmptyStateTextView.setText("TEST: No Internet Connection"); //TODO: Correct String Literals
         } else {
+            mEmptyStateTextView.setVisibility(View.GONE);
             getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null, bookSearchLoaderCallback);
             Log.i(LOG_TAG, "TEST: initLoader executed");
         }
