@@ -103,6 +103,8 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
 
     }
 
+
+
     @Override
     public int getItemCount() {
         int items = mValues.size();

@@ -41,7 +41,6 @@ public class SpinnerInteractionListener implements AdapterView.OnItemSelectedLis
 
             String currentItem = parent.getItemAtPosition(pos).toString();
             Toast.makeText(view.getContext(), "Search language is " + currentItem + ".", Toast.LENGTH_SHORT).show();
-
             userSelect = false;
         }
     }
@@ -50,4 +49,6 @@ public class SpinnerInteractionListener implements AdapterView.OnItemSelectedLis
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+
 }

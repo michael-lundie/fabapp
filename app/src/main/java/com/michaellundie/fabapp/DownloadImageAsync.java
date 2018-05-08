@@ -54,5 +54,4 @@ public class DownloadImageAsync extends AsyncTask<String, Void, Bitmap> {
             listener.onImageDownloadError();
         }
     }
-
 }

@@ -30,12 +30,11 @@ public class MainActivity extends AppCompatActivity  {
     private ArrayList<BookItem> mList = new ArrayList<>();
 
     private static final int BOOKSEARCH_LOADER_ID = 1;
-    private static String GBOOKS_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes/?q=test&langRestrict=en&maxResults=20";
+    private static String GBOOKS_REQUEST_URL;
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
 
-    private final String KEY_RECYCLER_STATE = "recycler_state";
-    private Bundle mBundleRecyclerViewState;
+    private static final String BUNDLE_RECYCLER_LAYOUT = "classname.recycler.layout";
 
     private Button searchButton;
     private EditText searchEditText;
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
         SpinnerInteractionListener mSpinnerListener = new SpinnerInteractionListener();
         Spinner mSpinner = findViewById(R.id.languageSelect);
         setupSpinner(mSpinner, this, R.array.language_array, android.R.layout.simple_spinner_item);
@@ -55,10 +53,6 @@ public class MainActivity extends AppCompatActivity  {
 
         mRecyclerView = (RecycleViewWithSetEmpty) findViewById(R.id.list);
 
-
-
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecycleViewWithSetEmpty
         mRecyclerView.setHasFixedSize(false);
         mRecyclerView.setItemViewCacheSize(5);
 
@@ -72,17 +66,31 @@ public class MainActivity extends AppCompatActivity  {
         searchButton = findViewById(R.id.searchButton);
         searchEditText = findViewById(R.id.searchEditText);
         // Let's use a linear layout manager
-        mAdapter = new BookSearchViewAdapter(mList, this);
 
-        // Let's specify an adapter.
-        //mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        //mRecyclerView.setAdapter(mAdapter);
+        if(savedInstanceState != null)
+        {
+            Log.i(LOG_TAG, "TEST: SAVEDINSTANCE not null");
+            mList = savedInstanceState.getParcelableArrayList("mList");
+            if (mList !=null) {Log.i(LOG_TAG, "TEST: Resume list is not null.");}
+            mAdapter = new BookSearchViewAdapter(mList, this);
+
+            // Re-attach our loader manager. https://stackoverflow.com/a/16525445/9738433
+            getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null, bookSearchLoaderCallback);
+        } else {
+            mAdapter = new BookSearchViewAdapter(mList, this);
+        }
 
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
 
+        //Saving parcelable code adapted from : https://stackoverflow.com/a/12503875/9738433
+        outState.putParcelableArrayList("mList", mList);
+        super.onSaveInstanceState(outState);
+    }
 
     public void onSearchClicked(View searchButton) {
         // upon a new search initiation, destroy previous loader.
@@ -95,10 +103,12 @@ public class MainActivity extends AppCompatActivity  {
         mAdapter.notifyDataSetChanged();
 
         String userQuery = searchEditText.getText().toString();
-        Context context = getApplicationContext();
 
         //TODO: Hook up language selection
+        //Check for chosen language.
+
         GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,userQuery,"en");
+
         executeSearch();
     }
 
@@ -128,12 +138,11 @@ public class MainActivity extends AppCompatActivity  {
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
                 resourceArray, resourceItem);
-// Specify the layout to use when the list of choices appears
+        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-// Apply the adapter to the spinner
+        // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
     }
-
     public static void setmLanguage(int mLanguage) {
         MainActivity.mLanguage = mLanguage;
     }
