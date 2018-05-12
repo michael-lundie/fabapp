@@ -42,10 +42,9 @@ public final class QueryUtils {
      * Method for building our query URL
      * @param context The current activity context.
      * @param searchInput The search input from the user.
-     * @param language The search language the user has chosen.
      * @return
      */
-    public static String queryRequestBuilder (Context context, String searchInput, String language){
+    public static String queryRequestBuilder (Context context, String searchInput){
 
         //Set up our variables ready for our string builder
         //NOTE: Is it better to initialise these outside of this method? Are they recreated and
@@ -59,6 +58,24 @@ public final class QueryUtils {
         final String API_LANG_PARAM = "langRestrict";
         final String API_RETURN_VALUE = context.getResources().getString(R.string.api_return_value);
 
+        // Get the selected search language
+
+        int mSelectedLanguage = SpinnerInteractionListener.getSelectedLanguage();
+        String searchLanguageISO;
+        switch (mSelectedLanguage) {
+            case SpinnerInteractionListener.ENGLISH:
+                searchLanguageISO = "en";
+                break;
+            case SpinnerInteractionListener.JAPANESE:
+                searchLanguageISO = "ja";
+                break;
+            default:
+                // Todo: Add log
+                searchLanguageISO = "en";
+                break;
+        }
+
+
         //Use URL builder to construct our URL
         Uri.Builder query = new Uri.Builder();
         query.scheme("https")
@@ -67,7 +84,7 @@ public final class QueryUtils {
                 .appendPath(API_VERSION)
                 .appendPath(API_VOLUMES_PATH)
                 .appendQueryParameter(API_QUERY_PARAM, searchInput)
-                .appendQueryParameter(API_LANG_PARAM, language)
+                .appendQueryParameter(API_LANG_PARAM, searchLanguageISO)
                 .appendQueryParameter(API_RESULTS_PARAM, API_RETURN_VALUE)
                 .build();
         URL returnUrl = null;

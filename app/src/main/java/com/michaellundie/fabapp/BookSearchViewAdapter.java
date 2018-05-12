@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -89,21 +90,24 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         BitmapDrawable image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
 
         if(image != null) {
+            holder.thumbnailProgressBar.setVisibility(View.INVISIBLE);
+            holder.mThumbnailView.setVisibility(View.VISIBLE);
             Log.i(LOG_TAG, "TEST: Looks like image is in cache - return it.");
             // This internally is checking reference count on previous bitmap it used.
             imageView.setImageDrawable(image);
         } else {
             Log.i(LOG_TAG, "TEST: Nothing in cache, download and put it in cache");
+            // Set up a loading spinner
+            holder.thumbnailProgressBar.setVisibility(View.VISIBLE);
+            holder.mThumbnailView.setVisibility(View.INVISIBLE);
             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
-            imageAndViewPair.put(holder.mThumbnailId, holder.mItem.getThumbnailURL());
+            imageAndViewPair.put(holder.mThumbnailViewId, holder.mItem.getThumbnailURL());
 
-            loadImagesAsync(imageAndViewPair, holder.mView, holder.mItem.getItemID());
+            loadImagesAsync(imageAndViewPair, holder.mView, holder.mItem.getItemID(), holder.thumbnailProgressBar);
         }
         // -End code from https://stackoverflow.com/a/22855962/9738433-
 
     }
-
-
 
     @Override
     public int getItemCount() {
@@ -132,8 +136,9 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         public final TextView mAuthor0View;
         public final TextView mAuthor1View;
         public final TextView mAuthor2View;
-        public final Integer mThumbnailId;
+        public final Integer mThumbnailViewId;
         public final ImageView mThumbnailView;
+        public final ProgressBar thumbnailProgressBar;
         public BookItem mItem;
 
 
@@ -145,13 +150,14 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             mAuthor1View = (TextView) view.findViewById(R.id.author1);
             mAuthor2View = (TextView) view.findViewById(R.id.author2);
             mThumbnailView = (ImageView) view.findViewById(R.id.thumbnail);
-            mThumbnailId = R.id.thumbnail;
+            mThumbnailViewId = R.id.thumbnail;
+            thumbnailProgressBar = (ProgressBar) view.findViewById(R.id.thumb_progress_spinner);
         }
     }
 
     // Image Async Downloader code from:
     // https://android.jlelse.eu/async-loading-images-on-android-like-a-big-baws-fd97d1a91374
-    private void loadImagesAsync(final Map<Integer, String> bindings, final View view, final int id) {
+    private void loadImagesAsync(final Map<Integer, String> bindings, final View view, final int id, final ProgressBar progressBar) {
         for (final Map.Entry<Integer, String> binding :
                 bindings.entrySet()) {
             new DownloadImageAsync(new DownloadImageAsync.Listener() {
@@ -160,9 +166,10 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                     BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
 
                     CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
-
-                    ((ImageView) view.findViewById(binding.getKey()))
-                            .setImageDrawable(bitmapDrawable);
+                    ImageView thumbnailView = view.findViewById(binding.getKey());
+                    thumbnailView.setImageDrawable(bitmapDrawable);
+                    thumbnailView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
                 }
                 @Override
                 public void onImageDownloadError() {

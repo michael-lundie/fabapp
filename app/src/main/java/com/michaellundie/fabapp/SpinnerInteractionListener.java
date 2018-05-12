@@ -12,8 +12,9 @@ import static com.michaellundie.fabapp.MainActivity.setmLanguage;
 public class SpinnerInteractionListener implements AdapterView.OnItemSelectedListener, View.OnTouchListener {
 
     boolean userSelect = false;
-    final int ENGLISH = 0;
-    final int JAPANESE = 1;
+    final static int ENGLISH = 0;
+    final static int JAPANESE = 1;
+    private static int mSelectedLanguage;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -27,13 +28,13 @@ public class SpinnerInteractionListener implements AdapterView.OnItemSelectedLis
             int selectionId = (int) id;
             switch (selectionId){
                 case 0:
-                    setmLanguage(ENGLISH); //English
+                    mSelectedLanguage = ENGLISH; //English
                     break;
                 case 1:
-                    setmLanguage(JAPANESE); //Japanese
+                    mSelectedLanguage = JAPANESE; //Japanese
                     break;
                 default:
-                    setmLanguage(2);
+                    mSelectedLanguage = ENGLISH;
                     break;
             }
 
@@ -50,5 +51,8 @@ public class SpinnerInteractionListener implements AdapterView.OnItemSelectedLis
 
     }
 
+    public static int getSelectedLanguage() {
+        return mSelectedLanguage;
+    }
 
 }

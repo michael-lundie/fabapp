@@ -1,17 +1,25 @@
 package com.michaellundie.fabapp;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.app.LoaderManager;
+import android.content.DialogInterface;
 import android.os.Parcelable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -45,9 +53,10 @@ public class MainActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
         SpinnerInteractionListener mSpinnerListener = new SpinnerInteractionListener();
         Spinner mSpinner = findViewById(R.id.languageSelect);
-        setupSpinner(mSpinner, this, R.array.language_array, android.R.layout.simple_spinner_item);
+        setupSpinner(mSpinner);
         mSpinner.setOnTouchListener(mSpinnerListener);
         mSpinner.setOnItemSelectedListener(mSpinnerListener);
 
@@ -63,9 +72,14 @@ public class MainActivity extends AppCompatActivity  {
         //Set up the progress ring view
         mProgressRing = findViewById(R.id.progressRing);
 
-        searchButton = findViewById(R.id.searchButton);
         searchEditText = findViewById(R.id.searchEditText);
-        // Let's use a linear layout manager
+        final Button searchButton = findViewById(R.id.searchButton);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSearchClicked();
+            }
+        });
 
         if(savedInstanceState != null)
         {
@@ -80,8 +94,15 @@ public class MainActivity extends AppCompatActivity  {
             mAdapter = new BookSearchViewAdapter(mList, this);
         }
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        mRecyclerView.setAdapter(mAdapter);
+        int orientation = getResources().getConfiguration().orientation;
+
+        if (orientation == 1) {
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+            mRecyclerView.setAdapter(mAdapter);
+        }
     }
 
     @Override
@@ -92,7 +113,7 @@ public class MainActivity extends AppCompatActivity  {
         super.onSaveInstanceState(outState);
     }
 
-    public void onSearchClicked(View searchButton) {
+    public void onSearchClicked() {
         // upon a new search initiation, destroy previous loader.
         getLoaderManager().destroyLoader(BOOKSEARCH_LOADER_ID);
         //clear the array list
@@ -101,13 +122,13 @@ public class MainActivity extends AppCompatActivity  {
         CacheManager.getInstance().clear();
         //notify the adapter
         mAdapter.notifyDataSetChanged();
-
+        mRecyclerView.scrollToPosition(0);
         String userQuery = searchEditText.getText().toString();
 
         //TODO: Hook up language selection
         //Check for chosen language.
 
-        GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,userQuery,"en");
+        GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,userQuery);
 
         executeSearch();
     }
@@ -134,10 +155,11 @@ public class MainActivity extends AppCompatActivity  {
     /*
      * Helper methods
      */
-    private void setupSpinner(Spinner spinner, Context context, int resourceArray, int resourceItem) {
+    private void setupSpinner(Spinner spinner) {
         // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
-                resourceArray, resourceItem);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.language_array, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
@@ -145,5 +167,44 @@ public class MainActivity extends AppCompatActivity  {
     }
     public static void setmLanguage(int mLanguage) {
         MainActivity.mLanguage = mLanguage;
+    }
+
+
+    private void showSearchDialogue() {
+        LayoutInflater dialogInflator = getLayoutInflater();
+        ViewGroup viewRoot = findViewById(R.id.searchDialog);
+
+
+        View dialogView = dialogInflator.inflate(R.layout.search_dialogue, viewRoot);
+
+        AlertDialog.Builder searchDialogBuilder = new AlertDialog.Builder(this);
+        searchDialogBuilder.setView(dialogView);
+
+        final EditText searchInputEditText = (EditText) viewRoot.findViewById(R.id.searchEditText);
+        final Spinner languageSelectSpinner = (Spinner) viewRoot.findViewById(R.id.languageSelect);
+
+
+
+        //final Dialog searchDialog = new Dialog(this);
+        //searchDialog.setContentView(searchDialog.findViewById(R.id.searchDialog));
+        //searchDialog.setTitle("Search Books");
+
+        //Set-up dialogue views
+        EditText searchInput = (EditText) searchDialog.findViewById(R.id.searchEditText);
+
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Search Books")
+                .setMessage("What do you want to do next?")
+                .setView(taskEditText)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String task = String.valueOf(taskEditText.getText());
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
     }
 }

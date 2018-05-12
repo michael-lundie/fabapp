@@ -17,24 +17,34 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/thumbnail"
+            <FrameLayout
+                android:id="@+id/thumbnailFrame"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:scaleType="centerCrop"
-                tools:src="@drawable/book_thumb_dummy"
-                />
-
+                android:layout_height="180dp">
+                <ImageView
+                    android:id="@+id/thumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/book_thumb_dummy"
+                    android:visibility="invisible"
+                    />
+                <ProgressBar
+                    android:id="@+id/thumb_progress_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    style="@style/Widget.AppCompat.ProgressBar"
+                    android:visibility="visible"/>
+            </FrameLayout>
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/thumbnail"
                 android:paddingLeft="@dimen/title_padding"
                 android:paddingRight="@dimen/title_padding"
                 android:paddingTop="@dimen/title_padding"
+                android:layout_alignBottom="@+id/thumbnailFrame"
                 android:textSize="@dimen/title_textSize"
                 tools:text="Not my Father"/>
 
