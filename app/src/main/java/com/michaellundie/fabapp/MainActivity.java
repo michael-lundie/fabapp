@@ -1,32 +1,23 @@
 package com.michaellundie.fabapp;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.app.LoaderManager;
 import android.content.DialogInterface;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity  {
 
@@ -42,23 +33,13 @@ public class MainActivity extends AppCompatActivity  {
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
 
-    private static final String BUNDLE_RECYCLER_LAYOUT = "classname.recycler.layout";
-
-    private Button searchButton;
-    private EditText searchEditText;
-    static int mLanguage;
+    static String mLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
-        SpinnerInteractionListener mSpinnerListener = new SpinnerInteractionListener();
-        Spinner mSpinner = findViewById(R.id.languageSelect);
-        setupSpinner(mSpinner);
-        mSpinner.setOnTouchListener(mSpinnerListener);
-        mSpinner.setOnItemSelectedListener(mSpinnerListener);
 
         mRecyclerView = (RecycleViewWithSetEmpty) findViewById(R.id.list);
 
@@ -72,12 +53,17 @@ public class MainActivity extends AppCompatActivity  {
         //Set up the progress ring view
         mProgressRing = findViewById(R.id.progressRing);
 
-        searchEditText = findViewById(R.id.searchEditText);
-        final Button searchButton = findViewById(R.id.searchButton);
-        searchButton.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton searchDialogButton = findViewById(R.id.fab_search);
+        searchDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onSearchClicked();
+                boolean isConnected = QueryUtils.checkNetworkAccess(view.getContext());
+                if (!isConnected) {
+                    // Todo: stringliteral
+                    showToast("No Internet access. Please check your settings.");
+                } else {
+                    showSearchDialogue(view.getContext());
+                }
             }
         });
 
@@ -113,7 +99,7 @@ public class MainActivity extends AppCompatActivity  {
         super.onSaveInstanceState(outState);
     }
 
-    public void onSearchClicked() {
+    public void onSearchClicked(String searchInput) {
         // upon a new search initiation, destroy previous loader.
         getLoaderManager().destroyLoader(BOOKSEARCH_LOADER_ID);
         //clear the array list
@@ -123,12 +109,11 @@ public class MainActivity extends AppCompatActivity  {
         //notify the adapter
         mAdapter.notifyDataSetChanged();
         mRecyclerView.scrollToPosition(0);
-        String userQuery = searchEditText.getText().toString();
 
         //TODO: Hook up language selection
         //Check for chosen language.
 
-        GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,userQuery);
+        GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,searchInput, mLanguage);
 
         executeSearch();
     }
@@ -155,24 +140,13 @@ public class MainActivity extends AppCompatActivity  {
     /*
      * Helper methods
      */
-    private void setupSpinner(Spinner spinner) {
-        // Create an ArrayAdapter using the string array and a default spinner layout
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.language_array, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);
-    }
-    public static void setmLanguage(int mLanguage) {
-        MainActivity.mLanguage = mLanguage;
-    }
 
 
-    private void showSearchDialogue() {
+    private void showSearchDialogue(Context context) {
         LayoutInflater dialogInflator = getLayoutInflater();
-        ViewGroup viewRoot = findViewById(R.id.searchDialog);
+
+
+        final ViewGroup viewRoot = findViewById(R.id.searchDialog);
 
 
         View dialogView = dialogInflator.inflate(R.layout.search_dialogue, viewRoot);
@@ -180,31 +154,64 @@ public class MainActivity extends AppCompatActivity  {
         AlertDialog.Builder searchDialogBuilder = new AlertDialog.Builder(this);
         searchDialogBuilder.setView(dialogView);
 
-        final EditText searchInputEditText = (EditText) viewRoot.findViewById(R.id.searchEditText);
-        final Spinner languageSelectSpinner = (Spinner) viewRoot.findViewById(R.id.languageSelect);
+        final EditText searchInputEditText = (EditText) dialogView.findViewById(R.id.searchEditText);
+        final TextView englishSelectButton = (TextView) dialogView.findViewById(R.id.englishSelector);
+        final TextView japaneseSelectButton = (TextView) dialogView.findViewById(R.id.japaneseSelector);
 
+        englishSelectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLanguage = "en";
+                englishSelectButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+            }
+        });
+        japaneseSelectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLanguage = "ja";
+                japaneseSelectButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+            }
+        });
 
+        // Setup Language options array
+        final CharSequence[] items = {"English","Japanese"};
 
-        //final Dialog searchDialog = new Dialog(this);
-        //searchDialog.setContentView(searchDialog.findViewById(R.id.searchDialog));
-        //searchDialog.setTitle("Search Books");
+        searchDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("Search",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
 
-        //Set-up dialogue views
-        EditText searchInput = (EditText) searchDialog.findViewById(R.id.searchEditText);
+                                // Fetch the users search query from EditText input.
+                                //Append trim method to make sure spaces are accounted for when using
+                                //TextUtils.isEmpty method.
+                                String searchInput = searchInputEditText.getText().toString().trim();
+                                //Best check to make sure there was some input
+                                if (TextUtils.isEmpty(searchInput)) {
+                                    // Show a toast informing the user of the error
+                                    showToast("message");
+                                } else {
+                                    // Process the search input string
+                                    onSearchClicked(searchInput);
+                                }
+                                Log.i(LOG_TAG, "TEST: Input : " + searchInput);
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
 
+        // Create the dialog from the builder
+        AlertDialog alertDialog = searchDialogBuilder.create();
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Search Books")
-                .setMessage("What do you want to do next?")
-                .setView(taskEditText)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String task = String.valueOf(taskEditText.getText());
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
-        dialog.show();
+        // Show the dialogue (attached to FAB onClick event)
+        alertDialog.show();
+    }
+
+    private void showToast(String toastMessage) {
+        Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
     }
 }
