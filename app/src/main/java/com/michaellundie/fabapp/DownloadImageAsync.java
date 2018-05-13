@@ -18,15 +18,19 @@ import java.util.Map;
 // Image Async Downloader code primarily from:
 // https://android.jlelse.eu/async-loading-images-on-android-like-a-big-baws-fd97d1a91374
 
+/**
+ * Async task for download images.
+ */
 public class DownloadImageAsync extends AsyncTask<String, Void, Bitmap> {
 
-    private Listener listener;
+    private static final String LOG_TAG = DownloadImageAsync.class.getSimpleName();
 
+    private Listener listener;
     public DownloadImageAsync(final Listener listener) {
         this.listener = listener;
     }
 
-    public static interface Listener {
+    public interface Listener {
         void onImageDownloaded(final Bitmap bitmap);
         void onImageDownloadError();
     }
@@ -35,14 +39,13 @@ public class DownloadImageAsync extends AsyncTask<String, Void, Bitmap> {
     protected Bitmap doInBackground(String... urls) {
         final String url = urls[0];
         Bitmap bitmap = null;
-
         try {
             final InputStream inputStream = new URL(url).openStream();
             bitmap = BitmapFactory.decodeStream(inputStream);
         } catch (final MalformedURLException malformedUrlException) {
-            // Handle error
+            Log.e(LOG_TAG, "There was a problem with the URL.", malformedUrlException);
         } catch (final IOException ioException) {
-            // Handle error
+            Log.e(LOG_TAG, "There was a problem loading the requested image.", ioException);
         }
         return bitmap;
     }

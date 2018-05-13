@@ -20,39 +20,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAdapter.ViewHolder> {
 
+/**
+ * An extended RecyclerView adapter managing parsed query results and displaying them on the UI.
+ */
+public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAdapter.ViewHolder> {
 
     public static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
     private Context mContext;
     private final ArrayList<BookItem> mValues;
 
-    //TODO: Log tool
-    private static int viewPositionVariable;
-    private static int viewPositionKey;
-
     public BookSearchViewAdapter(ArrayList<BookItem> items, Context context) {
         mValues = items;
         mContext = context;
-        Log.i(LOG_TAG, "TEST: Initialising BookSearchViewAdapter");
     }
-
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.i(LOG_TAG, "TEST: OnCreateViewHolder called.");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.book_card, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final @NonNull BookSearchViewAdapter.ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        Log.i(LOG_TAG, "TEST: onBindViewHolder called. Current Item: " + holder.mItem);
-        holder.mTitleView.setText(mValues.get(position).getTitle());
 
+        holder.mItem = mValues.get(position);
+        holder.mTitleView.setText(mValues.get(position).getTitle());
         ArrayList<String> authorArray = holder.mItem.getAuthors();
+
         for (int authorNumber = 0; authorNumber < authorArray.size(); authorNumber++) {
             //TODO: Handle case more than 3 authors.
             switch (authorNumber) {
@@ -72,41 +68,30 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             }
         }
 
-        // Let's load our thumbnail images.
-        //TODO: Log tool
-        viewPositionVariable = position;
-        viewPositionKey = holder.mItem.getItemID();
-
-        ImageView imageView;
-
-        imageView = (ImageView) holder.mThumbnailView;
+        ImageView imageView = (ImageView) holder.mThumbnailView;
 
         // Fetch the URL we will use for downloading our image
         String dataItem = mValues.get(position).getThumbnailURL();
 
-        // -Begin code from https://stackoverflow.com/a/22855962/9738433-
-        Log.i(LOG_TAG, "TEST: Attempting to get bitmap from cache for position " + position);
-
+        // -Begin edited code from https://stackoverflow.com/a/22855962/9738433-
         BitmapDrawable image = CacheManager.getInstance().getBitmapFromMemCache(holder.mItem.getItemID());
 
         if(image != null) {
+            // We have results in our cache for this image. Hide the progress spinner and load the image
             holder.thumbnailProgressBar.setVisibility(View.INVISIBLE);
             holder.mThumbnailView.setVisibility(View.VISIBLE);
-            Log.i(LOG_TAG, "TEST: Looks like image is in cache - return it.");
-            // This internally is checking reference count on previous bitmap it used.
+            //I removed the custom ImageViews from the original code example
             imageView.setImageDrawable(image);
         } else {
-            Log.i(LOG_TAG, "TEST: Nothing in cache, download and put it in cache");
-            // Set up a loading spinner
+            //Images are not in cache for this item so begin our Async stream the thumbnail
+            // Set up loading spinner on our thumbnail views
             holder.thumbnailProgressBar.setVisibility(View.VISIBLE);
             holder.mThumbnailView.setVisibility(View.INVISIBLE);
             HashMap<Integer, String> imageAndViewPair = new HashMap<Integer, String>();
             imageAndViewPair.put(holder.mThumbnailViewId, holder.mItem.getThumbnailURL());
-
             loadImagesAsync(imageAndViewPair, holder.mView, holder.mItem.getItemID(), holder.thumbnailProgressBar);
         }
-        // -End code from https://stackoverflow.com/a/22855962/9738433-
-
+        // -End edit code from https://stackoverflow.com/a/22855962/9738433-
     }
 
     @Override
@@ -124,25 +109,18 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         super.onViewRecycled(holder);
     }
 
-    @Override
-    public long getItemId(int position) {
-        Log.i(LOG_TAG, "TEST: Current ITEM ID:" + getItemId(position));
-        return super.getItemId(position);
-    }
+    class ViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final TextView mTitleView;
+        final TextView mAuthor0View;
+        final TextView mAuthor1View;
+        final TextView mAuthor2View;
+        final Integer mThumbnailViewId;
+        final ImageView mThumbnailView;
+        final ProgressBar thumbnailProgressBar;
+        BookItem mItem;
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mTitleView;
-        public final TextView mAuthor0View;
-        public final TextView mAuthor1View;
-        public final TextView mAuthor2View;
-        public final Integer mThumbnailViewId;
-        public final ImageView mThumbnailView;
-        public final ProgressBar thumbnailProgressBar;
-        public BookItem mItem;
-
-
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.title);
@@ -155,7 +133,7 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         }
     }
 
-    // Image Async Downloader code from:
+    // Altered image Async download code from:
     // https://android.jlelse.eu/async-loading-images-on-android-like-a-big-baws-fd97d1a91374
     private void loadImagesAsync(final Map<Integer, String> bindings, final View view, final int id, final ProgressBar progressBar) {
         for (final Map.Entry<Integer, String> binding :
@@ -163,12 +141,16 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             new DownloadImageAsync(new DownloadImageAsync.Listener() {
                 @Override
                 public void onImageDownloaded(final Bitmap bitmap) {
+                    // Create a new bitmap drawable
                     BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
-
+                    //Add the drawable to our cache instance
                     CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
                     ImageView thumbnailView = view.findViewById(binding.getKey());
+                    //Set the drawable to our fragment thumbnail view
                     thumbnailView.setImageDrawable(bitmapDrawable);
+                    //Show our thumbnail
                     thumbnailView.setVisibility(View.VISIBLE);
+                    //Hide the UI progress spinner
                     progressBar.setVisibility(View.INVISIBLE);
                 }
                 @Override
@@ -178,16 +160,5 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                 }
             }).execute(binding.getValue());
         }
-    }
-
-    /*
-    BEGIN LOG TOOLS
-     */
-
-    public static int getViewPosition() {
-        return viewPositionVariable;
-    }
-    public static int getViewKey() {
-        return viewPositionKey;
     }
 }

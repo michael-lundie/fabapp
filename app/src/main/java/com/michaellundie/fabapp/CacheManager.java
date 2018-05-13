@@ -10,50 +10,38 @@ import android.util.LruCache;
 
 public class CacheManager {
 
-    public static final String LOG_TAG = CacheManager.class.getSimpleName();
-
+    private static final String LOG_TAG = CacheManager.class.getSimpleName();
     private LruCache<Integer, BitmapDrawable> mMemoryCache;
-
     private static CacheManager instance;
 
     public static CacheManager getInstance() {
         if(instance == null) {
+            // If instance is null create a new instance
             instance = new CacheManager();
             instance.init();
         }
-
         return instance;
     }
 
     private void init() {
-
-        // We are declaring a cache of 6Mb for our use.
-        // You need to calculate this on the basis of your need
-        mMemoryCache = new LruCache<Integer, BitmapDrawable>(6 * 1024 * 1024) {
+        // Set up LruCache and assign our maximum cache size
+        mMemoryCache = new LruCache<Integer, BitmapDrawable>(4 * 1024 * 1024) {
             @Override
             protected int sizeOf(Integer key, BitmapDrawable bitmapDrawable) {
                 // The cache size will be measured in kilobytes rather than
                 // number of items.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
                     return bitmapDrawable.getBitmap().getByteCount() ;
-                } else {
-                    return bitmapDrawable.getBitmap().getRowBytes() * bitmapDrawable.getBitmap().getHeight();
-                }
             }
-
             @Override
             protected void entryRemoved(boolean evicted, Integer key, BitmapDrawable oldValue, BitmapDrawable newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);
-                //oldValue.setIsCached(false);
             }
         };
-
     }
 
     public void addBitmapToMemoryCache(Integer key, BitmapDrawable bitmapDrawable) {
         if (getBitmapFromMemCache(key) == null) {
-            // The removed entry is a recycling drawable, so notify it
-            // that it has been added into the memory cache
+            // Not using 'recycling drawables as was in the original code base
             mMemoryCache.put(key, bitmapDrawable);
         }
     }
@@ -62,11 +50,8 @@ public class CacheManager {
                 if(key ==null) {
                     Log.i(LOG_TAG, "TEST: Key is null, null will be returned.");
                 }
-                Log.i(LOG_TAG, "TEST: getBitmapFromMemCache called.");
                 return mMemoryCache.get(key);
-
         }
-
     public void clear() {
         mMemoryCache.evictAll();
     }

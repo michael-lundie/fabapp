@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
-import java.util.jar.Pack200;
 
 /*
  * A simple class to store and handle BookItem data.
@@ -17,7 +16,7 @@ public class BookItem implements Parcelable {
     private int itemID;
 
     //Default Constructor
-    public BookItem(String title, ArrayList<String> author, String thumbnailURL, int itemID) {
+    BookItem(String title, ArrayList<String> author, String thumbnailURL, int itemID) {
         this.title = title;
         this.authors = author;
         this.thumbnailURL = thumbnailURL;

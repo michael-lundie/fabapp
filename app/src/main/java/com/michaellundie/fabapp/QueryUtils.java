@@ -32,8 +32,6 @@ public final class QueryUtils {
 
     /**
      * Create a private constructor because no one should ever create a {@link QueryUtils} object.
-     * This class is only meant to hold static variables and methods, which can be accessed
-     * directly from the class name QueryUtils (and an object instance of QueryUtils is not needed).
      */
     private QueryUtils() {
     }
@@ -42,7 +40,7 @@ public final class QueryUtils {
      * Method for building our query URL
      * @param context The current activity context.
      * @param searchInput The search input from the user.
-     * @return
+     * @return url string
      */
     public static String queryRequestBuilder (Context context, String searchInput, String language){
 
@@ -79,8 +77,6 @@ public final class QueryUtils {
             //any initial errors.
             Log.e(LOG_TAG, "There is a problem with URL construction.", e);
         }
-
-        Log.i(LOG_TAG,"TEST" + returnUrl.toString());
         //Handle any null pointer exception that may be thrown by .toString() method;
         if (returnUrl == null) {
             Log.i(LOG_TAG, "URL returned null.");
@@ -91,8 +87,8 @@ public final class QueryUtils {
     /**
      * Query the Google Books API and return an {@link List<BookItem>} object to represent a.
      * list of earthquakes
-     * @param requestUrl
-     * @return
+     * @param requestUrl the URL for our API data request
+     * @return parsed JSON query results (as a bookitem object)
      */
     public static ArrayList<BookItem> fetchBookResults(String requestUrl) {
         Log.i(LOG_TAG, "TEST: fetchBookResults: method called");
@@ -107,28 +103,27 @@ public final class QueryUtils {
             Log.e(LOG_TAG, "Error closing input stream", e);
         }
 
-        // Extract relevant fields from the JSON response and create an {@link BookItem} object
-        ArrayList<BookItem> bookitem = extractBookResults(jsonResponse);
-
-        // Return the {@link BookItem}
-        return bookitem;
+        // Extract relevant fields from the JSON response and return a List<BookItem> object
+        return extractBookResults(jsonResponse);
     }
-
 
     //TODO: Handle Null Pointer Exception
     /**
-     * TODO: docs
-     * @param context
-     * @return
+     * Checks to make sure the smart phone has access to the internet.
+     * @param context the application context
+     * @return boolean
      */
     public static boolean checkNetworkAccess(Context context) {
-        ConnectivityManager cm =
+        ConnectivityManager connMgr =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-        return isConnected;
+        // Check the connectivity manager is not null first to avoid NPE.
+        if (connMgr != null) {
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            // Returns true or false depending on connectivity status.
+            return networkInfo != null && networkInfo.isConnectedOrConnecting();
+        }
+        //Connectivity manager is null so returning false.
+        return false;
     }
 
     /**
@@ -208,6 +203,7 @@ public final class QueryUtils {
      * parsing a JSON response.
      */
     public static ArrayList<BookItem> extractBookResults(String bookQueryJSON) {
+
         // If the JSON string is empty or null, then return early.
         if (TextUtils.isEmpty(bookQueryJSON)) {
             return null;
@@ -216,7 +212,6 @@ public final class QueryUtils {
         // Create an empty List that we can start adding earthquakes to
         ArrayList<BookItem> bookQueryResults = new ArrayList<>();
 
-        //
         try {
             // Assign our returned query string to a new JSONObject
             JSONObject jsonObj = new JSONObject(bookQueryJSON);
@@ -229,10 +224,7 @@ public final class QueryUtils {
 
                 JSONObject currentBookJso = booksItemsJsa.getJSONObject(bookNumber);
                 JSONObject bookInfoJso = currentBookJso.getJSONObject("volumeInfo");
-
                 String bookTitle = bookInfoJso.optString("title");
-                //TODO: Remove Log
-                Log.i(LOG_TAG, "TEST: Book title:  " + bookTitle );
 
                 // Get the authors array and parse returned data.
                 JSONArray bookAuthorsJsa = bookInfoJso.optJSONArray("authors");
@@ -241,18 +233,9 @@ public final class QueryUtils {
                 if (bookAuthorsJsa != null) {
                         // Add each author to a Java ArrayList object.
                         for (int authorNumber = 0; authorNumber < bookAuthorsJsa.length(); authorNumber++) {
-                            //TODO: Remove Log
-                            Log.i(LOG_TAG, "TEST: Book author: retrieving index " + authorNumber );
-                            authors.add(bookAuthorsJsa.getString(authorNumber));
-                            //TODO: Remove Log
-                            Log.i(LOG_TAG, "TEST: Book author:  " + authors.get(authorNumber) );
                         }
                 }
-                //TODO: Remove Log
-                Log.i(LOG_TAG, "TEST: Book author:  " + authors.size() + " authors retrieved." );
-
                 // Get the book image thumbnail.
-
                 JSONObject imageLinks = bookInfoJso.optJSONObject("imageLinks");
                 String thumbnailURL;
                 if(imageLinks != null) {
@@ -260,9 +243,6 @@ public final class QueryUtils {
                 } else {
                     thumbnailURL = null;
                 }
-                //TODO: Remove Log
-                Log.i(LOG_TAG, "TEST: Book thumbnail:  " + thumbnailURL );
-
                 bookQueryResults.add(new BookItem(bookTitle, authors, thumbnailURL, bookNumber));
             }
 
@@ -270,7 +250,7 @@ public final class QueryUtils {
             // If an error is thrown when executing any of the above statements in the "try" block,
             // catch the exception here, so the app doesn't crash. Print a log message
             // with the message from the exception.
-            Log.e("QueryUtils", "Problem parsing the JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing the JSON results.", e);
     }
 
         // Return the list of earthquakes

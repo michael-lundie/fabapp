@@ -11,9 +11,13 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * Loader callback manager. Manages ongoing process in AsyncLoader and llows us to receive results
+ * from our API request straight away once the AsyncLoader thread has completed it's work.
+ */
 public class BookSearchCallback implements LoaderManager.LoaderCallbacks<ArrayList<BookItem>> {
 
-    public static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
+    private static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
     private Context context;
     private ArrayList<BookItem> list;
     private String connectURL;
@@ -34,26 +38,27 @@ public class BookSearchCallback implements LoaderManager.LoaderCallbacks<ArrayLi
 
     @Override
     public Loader<ArrayList<BookItem>> onCreateLoader(int id, Bundle args) {
-        Log.i(LOG_TAG, "TEST: onCreateLoader called.");
         return new BookSearchAsyncLoader(context, connectURL);
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
-        Log.i(LOG_TAG, "TEST: onLoaderReset executed");
+        // Reset was called. Clear our local ArrayList and notify our recyclerview adapter of the
+        // change.
         list.clear();
         adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onLoadFinished(Loader<ArrayList<BookItem>> loader, ArrayList<BookItem> data) {
-        Log.i(LOG_TAG, "TEST: onLoadFinished executed");
-        Log.i(LOG_TAG, "TEST: onLoadFinished data:" + data); //NOTE: OK!
+        //Loading is complete. Clear our local array list and notify the adapter of changes.
         list.clear();
         adapter.notifyDataSetChanged();
+        //Load all of our fetched and parsed data into our local ArrayList. Notify adapter.
         list.addAll(data);
         adapter.notifyDataSetChanged();
+        //Hide our UI progress spinner
         progressRing.setVisibility(View.GONE);
-        emptyStateTextView.setText("No Books"); //TODO: Edit string Literal
+        emptyStateTextView.setText(R.string.search_nobooks);
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.app.LoaderManager;
 import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -33,59 +34,70 @@ public class MainActivity extends AppCompatActivity  {
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
 
-    static String mLanguage;
+    static String mLanguage = "en";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Set up our content view
         setContentView(R.layout.activity_main);
 
+        // Set up our custom recycler view
         mRecyclerView = (RecycleViewWithSetEmpty) findViewById(R.id.list);
-
         mRecyclerView.setHasFixedSize(false);
         mRecyclerView.setItemViewCacheSize(5);
 
-        //Set the empty state for our custom RecycleViewer
+        //Set the empty state view for our custom RecycleViewer
         mEmptyStateTextView = (TextView) findViewById(R.id.list_empty);
         mRecyclerView.setEmptyView(mEmptyStateTextView);
 
         //Set up the progress ring view
         mProgressRing = findViewById(R.id.progressRing);
 
+        // Setting up our FAB search button
         FloatingActionButton searchDialogButton = findViewById(R.id.fab_search);
         searchDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean isConnected = QueryUtils.checkNetworkAccess(view.getContext());
                 if (!isConnected) {
-                    // Todo: stringliteral
-                    showToast("No Internet access. Please check your settings.");
+                    showToast(getResources().getString(R.string.no_connection));
                 } else {
-                    showSearchDialogue(view.getContext());
+                    showSearchDialogue();
                 }
             }
         });
 
+        //Check for a saved instance to handle rotation and resume
         if(savedInstanceState != null)
         {
             Log.i(LOG_TAG, "TEST: SAVEDINSTANCE not null");
             mList = savedInstanceState.getParcelableArrayList("mList");
-            if (mList !=null) {Log.i(LOG_TAG, "TEST: Resume list is not null.");}
-            mAdapter = new BookSearchViewAdapter(mList, this);
 
-            // Re-attach our loader manager. https://stackoverflow.com/a/16525445/9738433
-            getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null, bookSearchLoaderCallback);
-        } else {
-            mAdapter = new BookSearchViewAdapter(mList, this);
+            if (mList != null ) {
+                Log.i(LOG_TAG, "TEST: Resume list is not null.");
+
+                // Re-attach our loader manager. https://stackoverflow.com/a/16525445/9738433
+                getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null,
+                        bookSearchLoaderCallback);
+            } else {
+                findViewById(R.id.splash_image).setVisibility(View.VISIBLE);
+                mList = new ArrayList<>();
+            }
         }
+        // Create our new custom recycler adapter
+        mAdapter = new BookSearchViewAdapter(mList, this);
 
+        //Check for screen orientation
         int orientation = getResources().getConfiguration().orientation;
 
         if (orientation == 1) {
+            // If portrait mode set our Grid Layout to 2 columns
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
             mRecyclerView.setAdapter(mAdapter);
         } else {
+            // If landscape mode set our grid layout to 3 columns
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
             mRecyclerView.setAdapter(mAdapter);
         }
@@ -93,28 +105,28 @@ public class MainActivity extends AppCompatActivity  {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-
         //Saving parcelable code adapted from : https://stackoverflow.com/a/12503875/9738433
-        outState.putParcelableArrayList("mList", mList);
+        if (!mList.isEmpty()){
+            outState.putParcelableArrayList("mList", mList);
+        }
         super.onSaveInstanceState(outState);
     }
 
     public void onSearchClicked(String searchInput) {
+
         // upon a new search initiation, destroy previous loader.
         getLoaderManager().destroyLoader(BOOKSEARCH_LOADER_ID);
         //clear the array list
         mList.clear();
         //clear our cache
         CacheManager.getInstance().clear();
-        //notify the adapter
+        //notify the adapter and scroll to position 0
         mAdapter.notifyDataSetChanged();
         mRecyclerView.scrollToPosition(0);
 
-        //TODO: Hook up language selection
-        //Check for chosen language.
-
+        //Build our URL from user input
         GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,searchInput, mLanguage);
-
+        // Let's get started! Execute search!
         executeSearch();
     }
 
@@ -127,58 +139,73 @@ public class MainActivity extends AppCompatActivity  {
 
         boolean isConnected = QueryUtils.checkNetworkAccess(this);
         if (!isConnected) {
+            // There is no internet connection. Let's deal with that.
+            // We already checked for connection, but just in case the user resumed while the dialog
+            // was open, perhaps a double check is good here.
             mProgressRing.setVisibility(View.GONE);
             mEmptyStateTextView.setVisibility(View.VISIBLE);
-            mEmptyStateTextView.setText("TEST: No Internet Connection"); //TODO: Correct String Literals
+            showToast(getResources().getString(R.string.no_connection));
         } else {
+            // Looks like we are good to go.
             mEmptyStateTextView.setVisibility(View.GONE);
+            // Let's get our loader manager hooked up and started
             getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null, bookSearchLoaderCallback);
-            Log.i(LOG_TAG, "TEST: initLoader executed");
         }
     }
 
-    /*
-     * Helper methods
+    /**
+     * This method creates, displays and handles our search dialogue.
      */
+    private void showSearchDialogue() {
 
-
-    private void showSearchDialogue(Context context) {
         LayoutInflater dialogInflator = getLayoutInflater();
-
-
         final ViewGroup viewRoot = findViewById(R.id.searchDialog);
 
-
+        // Let's inflate our dialogue from the XML
         View dialogView = dialogInflator.inflate(R.layout.search_dialogue, viewRoot);
 
+        // Begin a new AlertDialog builder.
         AlertDialog.Builder searchDialogBuilder = new AlertDialog.Builder(this);
+
+        // Assign our inflate view to the dialog
         searchDialogBuilder.setView(dialogView);
 
+        //Set up our EditText and language selection TextViews.
         final EditText searchInputEditText = (EditText) dialogView.findViewById(R.id.searchEditText);
         final TextView englishSelectButton = (TextView) dialogView.findViewById(R.id.englishSelector);
         final TextView japaneseSelectButton = (TextView) dialogView.findViewById(R.id.japaneseSelector);
 
+        // Check which language has previously been selected. (Default is English)
+        // Set our buttons appropriately.
+        if (mLanguage == "ja") {
+            setBackground(japaneseSelectButton, R.drawable.rounded_selected);
+        } else {
+            setBackground(englishSelectButton, R.drawable.rounded_selected);
+        }
+
+        // Setting up onClickListeners for our language selection buttons (TextViews)
         englishSelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mLanguage = "en";
-                englishSelectButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                setBackground(englishSelectButton, R.drawable.rounded_selected);
+                setBackground(japaneseSelectButton, R.drawable.rounded);
             }
         });
         japaneseSelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mLanguage = "ja";
-                japaneseSelectButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                setBackground(japaneseSelectButton, R.drawable.rounded_selected);
+                setBackground(englishSelectButton, R.drawable.rounded);
+
             }
         });
 
-        // Setup Language options array
-        final CharSequence[] items = {"English","Japanese"};
-
+        // Let's build the rest of our dialog
         searchDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("Search",
+                .setPositiveButton(getResources().getString(R.string.search_button_text),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
 
@@ -189,15 +216,16 @@ public class MainActivity extends AppCompatActivity  {
                                 //Best check to make sure there was some input
                                 if (TextUtils.isEmpty(searchInput)) {
                                     // Show a toast informing the user of the error
-                                    showToast("message");
+                                    showToast(getResources().getString(R.string.empty_search));
                                 } else {
+                                    // Hide our splash image
+                                    findViewById(R.id.splash_image).setVisibility(View.GONE);
                                     // Process the search input string
                                     onSearchClicked(searchInput);
                                 }
-                                Log.i(LOG_TAG, "TEST: Input : " + searchInput);
                             }
                         })
-                .setNegativeButton("Cancel",
+                .setNegativeButton(getResources().getString(R.string.cancel_button_text),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
                                 dialog.cancel();
@@ -206,12 +234,16 @@ public class MainActivity extends AppCompatActivity  {
 
         // Create the dialog from the builder
         AlertDialog alertDialog = searchDialogBuilder.create();
-
         // Show the dialogue (attached to FAB onClick event)
         alertDialog.show();
     }
-
+/*
+  Helper methods.
+ */
     private void showToast(String toastMessage) {
         Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+    }
+    private void setBackground(View view, int resourceID) {
+        view.setBackgroundDrawable(ContextCompat.getDrawable(this, resourceID));
     }
 }

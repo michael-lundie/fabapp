@@ -27,11 +27,8 @@ public class RecycleViewWithSetEmpty extends RecyclerView {
                     RecycleViewWithSetEmpty.this.setVisibility(View.VISIBLE);
                 }
             }
-
         }
     };
-
-
 
     public RecycleViewWithSetEmpty(Context context) {
         super(context);

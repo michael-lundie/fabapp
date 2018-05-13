@@ -20,12 +20,20 @@
         <TextView
             android:id="@+id/englishSelector"
             android:layout_width="0dp"
+            android:padding="@dimen/half_padding"
+            android:layout_margin="@dimen/half_padding"
+            android:background="@drawable/rounded"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="English"/>
         <TextView
             android:id="@+id/japaneseSelector"
             android:layout_width="0dp"
+            android:padding="@dimen/half_padding"
+            android:layout_margin="@dimen/half_padding"
+            android:gravity="center"
+            android:background="@drawable/rounded"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Japanese"/>
