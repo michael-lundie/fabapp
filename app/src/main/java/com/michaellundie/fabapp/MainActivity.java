@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -92,12 +93,12 @@ public class MainActivity extends AppCompatActivity  {
         int orientation = getResources().getConfiguration().orientation;
 
         if (orientation == 1) {
-            // If portrait mode set our Grid Layout to 2 columns
-            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+            // If portrait mode use Linear Layout
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             mRecyclerView.setAdapter(mAdapter);
         } else {
-            // If landscape mode set our grid layout to 3 columns
-            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+            // If landscape mode set our grid layout to 2 columns
+            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
             mRecyclerView.setAdapter(mAdapter);
         }
     }
