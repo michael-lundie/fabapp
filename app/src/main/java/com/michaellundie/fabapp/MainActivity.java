@@ -74,15 +74,14 @@ public class MainActivity extends AppCompatActivity  {
         {
             Log.i(LOG_TAG, "TEST: SAVEDINSTANCE not null");
             mList = savedInstanceState.getParcelableArrayList("mList");
-
             if (mList != null ) {
                 Log.i(LOG_TAG, "TEST: Resume list is not null.");
-
+                findViewById(R.id.splash_image).setVisibility(View.INVISIBLE);
                 // Re-attach our loader manager. https://stackoverflow.com/a/16525445/9738433
                 getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null,
                         bookSearchLoaderCallback);
             } else {
-                findViewById(R.id.splash_image).setVisibility(View.VISIBLE);
+
                 mList = new ArrayList<>();
             }
         }
@@ -220,6 +219,7 @@ public class MainActivity extends AppCompatActivity  {
                                 } else {
                                     // Hide our splash image
                                     findViewById(R.id.splash_image).setVisibility(View.GONE);
+                                    findViewById(R.id.progressRing).setVisibility(View.VISIBLE);
                                     // Process the search input string
                                     onSearchClicked(searchInput);
                                 }

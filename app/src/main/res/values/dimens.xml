@@ -6,7 +6,7 @@
 
 	<!--/ Card View  /-->
 	<dimen name="title_padding">8dp</dimen>
-	<dimen name="title_textSize">12sp</dimen>
+	<dimen name="title_textSize">16sp</dimen>
 
 	<dimen name="author_textSize">12sp</dimen>
     <dimen name="text_margin">16dp</dimen>
