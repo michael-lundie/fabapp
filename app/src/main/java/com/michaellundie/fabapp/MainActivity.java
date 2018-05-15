@@ -1,7 +1,6 @@
 package com.michaellundie.fabapp;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.app.LoaderManager;
 import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,16 +23,17 @@ public class MainActivity extends AppCompatActivity  {
 
     public static final String LOG_TAG = MainActivity.class.getName();
 
-    private LoaderManager.LoaderCallbacks<ArrayList<BookItem>> bookSearchLoaderCallback;
+    // Create Loader Manager as static, to prevent NPE onDestroy
+    // NOTE: I tried to find a better way to handle this - but so far unsuccessful.
+    private static LoaderManager.LoaderCallbacks<ArrayList<BookItem>> bookSearchLoaderCallback;
+
     private RecycleViewWithSetEmpty mRecyclerView;
     private RecycleViewWithSetEmpty.Adapter mAdapter;
     private ArrayList<BookItem> mList = new ArrayList<>();
-
     private static final int BOOKSEARCH_LOADER_ID = 1;
     private static String GBOOKS_REQUEST_URL;
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
-
     static String mLanguage = "en";
 
     @Override
@@ -47,7 +46,6 @@ public class MainActivity extends AppCompatActivity  {
         // Set up our custom recycler view
         mRecyclerView = (RecycleViewWithSetEmpty) findViewById(R.id.list);
         mRecyclerView.setHasFixedSize(false);
-        mRecyclerView.setItemViewCacheSize(5);
 
         //Set the empty state view for our custom RecycleViewer
         mEmptyStateTextView = (TextView) findViewById(R.id.list_empty);
@@ -73,16 +71,12 @@ public class MainActivity extends AppCompatActivity  {
         //Check for a saved instance to handle rotation and resume
         if(savedInstanceState != null)
         {
-            Log.i(LOG_TAG, "TEST: SAVEDINSTANCE not null");
             mList = savedInstanceState.getParcelableArrayList("mList");
             if (mList != null ) {
-                Log.i(LOG_TAG, "TEST: Resume list is not null.");
                 findViewById(R.id.splash_image).setVisibility(View.INVISIBLE);
-                // Re-attach our loader manager. https://stackoverflow.com/a/16525445/9738433
                 getLoaderManager().initLoader(BOOKSEARCH_LOADER_ID, null,
                         bookSearchLoaderCallback);
             } else {
-
                 mList = new ArrayList<>();
             }
         }
@@ -110,6 +104,11 @@ public class MainActivity extends AppCompatActivity  {
             outState.putParcelableArrayList("mList", mList);
         }
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public void onSearchClicked(String searchInput) {
@@ -161,7 +160,7 @@ public class MainActivity extends AppCompatActivity  {
         LayoutInflater dialogInflator = getLayoutInflater();
         final ViewGroup viewRoot = findViewById(R.id.searchDialog);
 
-        // Let's inflate our dialogue from the XML
+        // Let's inflate our dialogue from the XML script
         View dialogView = dialogInflator.inflate(R.layout.search_dialogue, viewRoot);
 
         // Begin a new AlertDialog builder.

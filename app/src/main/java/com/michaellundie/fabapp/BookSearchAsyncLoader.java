@@ -13,7 +13,6 @@ import java.util.ArrayList;
 public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> {
 
     private static final String LOG_TAG = BookSearchAsyncLoader.class.getSimpleName();
-
     private ArrayList<BookItem> bookQueryResults = null;
     private String urlString;
 
@@ -62,5 +61,10 @@ public class BookSearchAsyncLoader extends AsyncTaskLoader<ArrayList<BookItem>> 
             }
         }
         return bookQueryResults;
+    }
+
+    @Override
+    public void deliverResult(ArrayList<BookItem> data) {
+        super.deliverResult(data);
     }
 }

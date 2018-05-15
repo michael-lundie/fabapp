@@ -1,8 +1,8 @@
 package com.michaellundie.fabapp;
 
-import android.app.LoaderManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -10,16 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 
 /**
  * An extended RecyclerView adapter managing parsed query results and displaying them on the UI.
@@ -29,10 +25,13 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
     public static final String LOG_TAG = BookSearchViewAdapter.class.getSimpleName();
     private Context mContext;
     private final ArrayList<BookItem> mValues;
+    private BitmapDrawable nothumbnail;
 
     public BookSearchViewAdapter(ArrayList<BookItem> items, Context context) {
         mValues = items;
         mContext = context;
+        nothumbnail = new BitmapDrawable(BitmapFactory.decodeResource
+                (mContext.getResources(), R.drawable.no_thumbnail));
     }
 
     @NonNull
@@ -48,26 +47,28 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         holder.mItem = mValues.get(position);
         holder.mTitleView.setText(mValues.get(position).getTitle());
         ArrayList<String> authorArray = holder.mItem.getAuthors();
+        String author_names = null;
 
-        for (int authorNumber = 0; authorNumber < authorArray.size(); authorNumber++) {
-            //TODO: Handle case more than 3 authors.
-            switch (authorNumber) {
-                case 0:
-                    holder.mAuthor0View.setText(authorArray.get(authorNumber));
-                    break;
-                case 1:
-                    holder.mAuthor1View.setText(authorArray.get(authorNumber));
-                    holder.mAuthor1View.setVisibility(View.VISIBLE);
-                    break;
-                case 2:
-                    holder.mAuthor2View.setText(authorArray.get(authorNumber));
-                    holder.mAuthor2View.setVisibility(View.VISIBLE);
-                    break;
-                default:
-                    break;
+        // Let's handle the authors data. First check if author data was returned.
+        if(authorArray.isEmpty()){
+            // No data: set string appropriately.
+            author_names = holder.mView.getResources().getString(R.string.no_authors);
+        } else {
+            // Data returned. Begin a string builder and append authors (in case of multiple).
+            StringBuilder names_builder = new StringBuilder();
+            for (int authorNumber = 0; authorNumber < authorArray.size(); authorNumber++) {
+                if (authorNumber == 0) {
+                    names_builder.append(authorArray.get(authorNumber));
+                } else {
+                    names_builder.append(", " + authorArray.get(authorNumber));
+                }
+                author_names = names_builder.toString();
             }
         }
+        // Set text for author names.
+        holder.mAuthor0View.setText(author_names);
 
+        // Set up our thumbnail imageView object.
         ImageView imageView = (ImageView) holder.mThumbnailView;
 
         // Fetch the URL we will use for downloading our image
@@ -96,16 +97,11 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
 
     @Override
     public int getItemCount() {
-        int items = mValues.size();
-        //TODO: Remove log
-        //String itemsCount = Integer.toString(items);
-        //Log.d("TEST: itemCount", itemsCount);
         return mValues.size();
     }
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
-        Log.i(LOG_TAG, "TEST: onViewRecycled ITEM ID:");
         super.onViewRecycled(holder);
     }
 
@@ -113,8 +109,6 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         final View mView;
         final TextView mTitleView;
         final TextView mAuthor0View;
-        final TextView mAuthor1View;
-        final TextView mAuthor2View;
         final Integer mThumbnailViewId;
         final ImageView mThumbnailView;
         final ProgressBar thumbnailProgressBar;
@@ -125,8 +119,6 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.title);
             mAuthor0View = (TextView) view.findViewById(R.id.author);
-            mAuthor1View = (TextView) view.findViewById(R.id.author1);
-            mAuthor2View = (TextView) view.findViewById(R.id.author2);
             mThumbnailView = (ImageView) view.findViewById(R.id.thumbnail);
             mThumbnailViewId = R.id.thumbnail;
             thumbnailProgressBar = (ProgressBar) view.findViewById(R.id.thumb_progress_spinner);
@@ -139,13 +131,14 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
         for (final Map.Entry<Integer, String> binding :
                 bindings.entrySet()) {
             new DownloadImageAsync(new DownloadImageAsync.Listener() {
+                ImageView thumbnailView = view.findViewById(binding.getKey());
+
                 @Override
                 public void onImageDownloaded(final Bitmap bitmap) {
                     // Create a new bitmap drawable
                     BitmapDrawable bitmapDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
                     //Add the drawable to our cache instance
                     CacheManager.getInstance().addBitmapToMemoryCache(id, bitmapDrawable);
-                    ImageView thumbnailView = view.findViewById(binding.getKey());
                     //Set the drawable to our fragment thumbnail view
                     thumbnailView.setImageDrawable(bitmapDrawable);
                     //Show our thumbnail
@@ -155,6 +148,11 @@ public class BookSearchViewAdapter extends RecyclerView.Adapter<BookSearchViewAd
                 }
                 @Override
                 public void onImageDownloadError() {
+                    // Let's hide the thumbnail view since no image was returned.
+                    CacheManager.getInstance().addBitmapToMemoryCache(id, nothumbnail);
+                    thumbnailView.setImageDrawable(nothumbnail);
+                    thumbnailView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.INVISIBLE);
                     Log.e(LOG_TAG, "Failed to download image for "
                             + binding.getKey());
                 }

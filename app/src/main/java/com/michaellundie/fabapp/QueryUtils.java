@@ -6,11 +6,9 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +25,7 @@ import java.util.List;
  */
 public final class QueryUtils {
 
-    public static final String LOG_TAG = QueryUtils.class.getSimpleName();
+    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
     /**
      * Create a private constructor because no one should ever create a {@link QueryUtils} object.
@@ -202,7 +199,7 @@ public final class QueryUtils {
      * Return a list of {@link BookItem} objects that has been built up from
      * parsing a JSON response.
      */
-    public static ArrayList<BookItem> extractBookResults(String bookQueryJSON) {
+    private static ArrayList<BookItem> extractBookResults(String bookQueryJSON) {
 
         // If the JSON string is empty or null, then return early.
         if (TextUtils.isEmpty(bookQueryJSON)) {
@@ -233,6 +230,7 @@ public final class QueryUtils {
                 if (bookAuthorsJsa != null) {
                         // Add each author to a Java ArrayList object.
                         for (int authorNumber = 0; authorNumber < bookAuthorsJsa.length(); authorNumber++) {
+                            authors.add(bookAuthorsJsa.getString(authorNumber));
                         }
                 }
                 // Get the book image thumbnail.

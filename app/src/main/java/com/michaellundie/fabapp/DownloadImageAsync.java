@@ -26,7 +26,7 @@ public class DownloadImageAsync extends AsyncTask<String, Void, Bitmap> {
     private static final String LOG_TAG = DownloadImageAsync.class.getSimpleName();
 
     private Listener listener;
-    public DownloadImageAsync(final Listener listener) {
+    DownloadImageAsync(final Listener listener) {
         this.listener = listener;
     }
 

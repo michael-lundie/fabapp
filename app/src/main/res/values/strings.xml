@@ -1,12 +1,15 @@
 <resources>
-    <string name="app_name">FABapp</string>
+    <string name="app_name">Find a Book App</string>
     <!-- UI strings -->
     <string name="search_text">Find a book...</string>
     <string name="search_button_text">Search</string>
     <string name="cancel_button_text">Cancel</string>
+    <string name="no_authors">Sorry! No authors listed.</string>
     <string name="empty_search">Oops! You didn\'t type anything. Please try again!</string>
     <string name="search_nobooks">No Books, click the pink search icon to make a new search.</string>
     <string name="no_connection">There is no internet connection. Please check your settings.</string>
+    <string name="search_english">English</string>
+    <string name="search_japanese">日本語</string>
     <!-- API Strings -->
     <string name="api_authority">www.googleapis.com</string>
     <string name="api_version">v1</string>

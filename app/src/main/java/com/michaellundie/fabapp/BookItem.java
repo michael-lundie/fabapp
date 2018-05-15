@@ -65,6 +65,4 @@ public class BookItem implements Parcelable {
     }
 
     public int getItemID() { return itemID; }
-
-
 }

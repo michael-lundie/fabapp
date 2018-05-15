@@ -4,7 +4,6 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -25,6 +24,8 @@ public class BookSearchCallback implements LoaderManager.LoaderCallbacks<ArrayLi
     private TextView emptyStateTextView;
     private RecycleViewWithSetEmpty.Adapter adapter;
 
+    private BookSearchAsyncLoader mLoader;
+
     BookSearchCallback(Context context, String connectURL, ArrayList<BookItem> list,
                        RecycleViewWithSetEmpty.Adapter adapter, ProgressBar bar,
                        TextView emptyStateView) {
@@ -38,13 +39,21 @@ public class BookSearchCallback implements LoaderManager.LoaderCallbacks<ArrayLi
 
     @Override
     public Loader<ArrayList<BookItem>> onCreateLoader(int id, Bundle args) {
-        return new BookSearchAsyncLoader(context, connectURL);
+        if (mLoader == null) {
+            // It's the first time to request a the loader, lets create a new instance.
+            return new BookSearchAsyncLoader(context, connectURL);
+        } else {
+            // Let's prevent any NPE on configuration change. Return the current instance.
+            // (We are using the same instance ID, so we don't want to cause problems here).
+            return mLoader;
+        }
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
         // Reset was called. Clear our local ArrayList and notify our recyclerview adapter of the
         // change.
+        mLoader = null;
         list.clear();
         adapter.notifyDataSetChanged();
     }
