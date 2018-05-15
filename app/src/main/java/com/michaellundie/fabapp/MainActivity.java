@@ -1,6 +1,7 @@
 package com.michaellundie.fabapp;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.LoaderManager;
 import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity  {
     private static String GBOOKS_REQUEST_URL;
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressRing;
+    private Dialog searchDialog = null;
+    static boolean dialogActive = false;
     static String mLanguage = "en";
 
     @Override
@@ -59,11 +62,18 @@ public class MainActivity extends AppCompatActivity  {
         searchDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                dialogActive = true;
                 boolean isConnected = QueryUtils.checkNetworkAccess(view.getContext());
                 if (!isConnected) {
                     showToast(getResources().getString(R.string.no_connection));
                 } else {
-                    showSearchDialogue();
+                    //Construct a search dialogue if none exists or if a dialog was open on rotation
+                    if (searchDialog == null) {
+                        searchDialog = searchDialogue();
+                    }
+                    //Show search dialogue
+                    searchDialog.show();
+
                 }
             }
         });
@@ -71,6 +81,13 @@ public class MainActivity extends AppCompatActivity  {
         //Check for a saved instance to handle rotation and resume
         if(savedInstanceState != null)
         {
+            if(savedInstanceState.getBoolean("dialogActive")) {
+                if (searchDialog == null) {
+                    searchDialog = searchDialogue();
+                }
+                //Show search dialogue
+                searchDialog.show();
+            }
             mList = savedInstanceState.getParcelableArrayList("mList");
             if (mList != null ) {
                 findViewById(R.id.splash_image).setVisibility(View.INVISIBLE);
@@ -103,12 +120,8 @@ public class MainActivity extends AppCompatActivity  {
         if (!mList.isEmpty()){
             outState.putParcelableArrayList("mList", mList);
         }
+        outState.putBoolean("dialogActive", dialogActive);
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     public void onSearchClicked(String searchInput) {
@@ -127,6 +140,14 @@ public class MainActivity extends AppCompatActivity  {
         GBOOKS_REQUEST_URL = QueryUtils.queryRequestBuilder(this,searchInput, mLanguage);
         // Let's get started! Execute search!
         executeSearch();
+    }
+
+    @Override
+    protected void onPause() {
+        if(dialogActive) {
+            searchDialog.dismiss();
+        }
+        super.onPause();
     }
 
     public void executeSearch() {
@@ -155,7 +176,7 @@ public class MainActivity extends AppCompatActivity  {
     /**
      * This method creates, displays and handles our search dialogue.
      */
-    private void showSearchDialogue() {
+    private Dialog searchDialogue() {
 
         LayoutInflater dialogInflator = getLayoutInflater();
         final ViewGroup viewRoot = findViewById(R.id.searchDialog);
@@ -207,7 +228,6 @@ public class MainActivity extends AppCompatActivity  {
                 .setPositiveButton(getResources().getString(R.string.search_button_text),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
-
                                 // Fetch the users search query from EditText input.
                                 //Append trim method to make sure spaces are accounted for when using
                                 //TextUtils.isEmpty method.
@@ -223,23 +243,23 @@ public class MainActivity extends AppCompatActivity  {
                                     // Process the search input string
                                     onSearchClicked(searchInput);
                                 }
+                                dialogActive = false;
                             }
                         })
                 .setNegativeButton(getResources().getString(R.string.cancel_button_text),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
+                                dialogActive = false;
                                 dialog.cancel();
                             }
                         });
 
         // Create the dialog from the builder
-        AlertDialog alertDialog = searchDialogBuilder.create();
-        // Show the dialogue (attached to FAB onClick event)
-        alertDialog.show();
+        return searchDialogBuilder.create();
     }
-/*
-  Helper methods.
- */
+    /*
+      Helper methods.
+     */
     private void showToast(String toastMessage) {
         Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
     }
