@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity  {
                 .setPositiveButton(getResources().getString(R.string.search_button_text),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,int id) {
+                                dialogActive = false;
                                 // Fetch the users search query from EditText input.
                                 //Append trim method to make sure spaces are accounted for when using
                                 //TextUtils.isEmpty method.
@@ -243,7 +244,6 @@ public class MainActivity extends AppCompatActivity  {
                                     // Process the search input string
                                     onSearchClicked(searchInput);
                                 }
-                                dialogActive = false;
                             }
                         })
                 .setNegativeButton(getResources().getString(R.string.cancel_button_text),
